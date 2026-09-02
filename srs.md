@@ -8,14 +8,14 @@ Công ty ABC cung cấp dịch vụ đặt xe trực tuyến. Hiện trạng: kh
 
 Các yếu tố định hình ngữ cảnh:
 
-- **Ba nhóm người dùng chính:** Khách hàng, Tài xế, Nhân viên vận hành — là các tác nhân trung tâm.
+- **Ba nhóm người dùng chính:** Khách hàng, Tài xế, Nhân viên vận hành
 - **Phụ thuộc bên ngoài:** nhà cung cấp thanh toán và (tương lai) nhà cung cấp thông báo — hệ thống tích hợp chứ không tự xử lý mọi thứ.
 
 ### 1.2 Vấn đề nghiệp vụ (Business Problem)
 
 Vấn đề: hệ thống hiện tại vừa thủ công vừa thiếu tính module/khả năng mở rộng. Đây là lý do tài liệu nhấn mạnh yêu cầu phi chức năng: các thành phần (thanh toán, thông báo…) phải mở rộng độc lập, và một lỗi ở thanh toán/thông báo không được làm sập luồng đặt xe. Bài toán không chỉ là “làm app đặt xe” mà là “làm một nền tảng chịu tải, tách rời và dễ tiến hóa”.
 
-| #  | Vấn đề hiện tại                      | Hệ quả nghiệp vụ                                                   |
+| \#  | Vấn đề hiện tại                      | Hệ quả nghiệp vụ                                                   |
 |-----|--------------------------------------|--------------------------------------------------------------------|
 | 1   | Phân công tài xế thủ công            | Chậm, dễ sai, không phục vụ được số lượng lớn, phụ thuộc con người |
 | 2   | Khách khó theo dõi trạng thái chuyến | Trải nghiệm kém, gọi tổng đài nhiều, mất niềm tin                  |
@@ -63,24 +63,26 @@ quadrantChart
     NCC Thong bao: [0.20, 0.20]
 ```
 
+*Sơ đồ 1 — Ma trận Stakeholder*
+
 ## Bước 3: Xác định business goal (mục đích)
 
-| Mã       | Business Goal                                   | Mục đích                                                                                                                                                                                                        |
-|----------|-------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **BG01** | Giảm thời gian tìm tài xế và tối ưu ghép tài xế | Tự động tìm & ghép tài xế phù hợp theo vị trí và trạng thái sẵn sàng (thay phân công thủ công); ưu tiên tài xế gần & phù hợp và tự chuyển tài xế khác khi bị từ chối/không phản hồi mà không bắt khách tạo lại. |
-| **BG02** | Hỗ trợ thanh toán linh hoạt                     | Cho phép thanh toán tiền mặt hoặc trực tuyến, tích hợp cổng ngoài mà không lưu dữ liệu thẻ nhạy cảm.                                                                                                            |
-| **BG03** | Tăng khả năng theo dõi chuyến đi                | Cho khách theo dõi trạng thái chuyến: đang tìm tài xế, tài xế đã nhận, ETA, tiến trình chuyến.                                                                                                                  |
-| **BG04** | Quản lý thanh toán & doanh thu tập trung        | Tập trung dữ liệu giao dịch để đối soát, xác định cước theo loại dịch vụ, báo cáo doanh thu chính xác.                                                                                                          |
-| **BG05** | Thông báo đa kênh, dễ mở rộng                   | Gửi thông báo cho khách & tài xế ở các mốc quan trọng; kiến trúc cho phép thêm kênh mới.                                                                                                                        |
-| **BG06** | Cung cấp công cụ vận hành & quản trị            | Giao diện quản trị để quản lý khách/tài xế/phương tiện/chuyến và xử lý chuyến lỗi.                                                                                                                              |
-| **BG07** | Hỗ trợ ra quyết định bằng báo cáo               | Báo cáo số chuyến, doanh thu, tỷ lệ hoàn thành/hủy, hiệu quả tài xế cho ban lãnh đạo.                                                                                                                           |
-| **BG08** | Đảm bảo độ ổn định khi tải cao                  | Giữ hệ thống ổn định lúc cao điểm; lỗi thanh toán/thông báo không làm sập luồng đặt xe.                                                                                                                         |
-| **BG09** | Bảo mật & phân quyền                            | Xác thực người dùng, kiểm soát quyền cho thao tác quản trị, bảo vệ dữ liệu cá nhân/vị trí/giao dịch.                                                                                                            |
-| **BG10** | Lưu vết phục vụ kiểm tra                        | Ghi log thao tác quan trọng để truy vết và điều tra khi có sự cố.                                                                                                                                               |
+| Mã       | Business Goal                            | Mục đích                                                                                                                                                                                                        |
+|----------|------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **BG01** | Giảm thời gian tìm tài xế                | Tự động tìm & ghép tài xế phù hợp theo vị trí và trạng thái sẵn sàng (thay phân công thủ công); ưu tiên tài xế gần & phù hợp và tự chuyển tài xế khác khi bị từ chối/không phản hồi mà không bắt khách tạo lại. |
+| **BG02** | Hỗ trợ thanh toán linh hoạt              | Cho phép thanh toán tiền mặt hoặc trực tuyến, tích hợp cổng ngoài mà không lưu dữ liệu thẻ nhạy cảm.                                                                                                            |
+| **BG03** | Tăng khả năng theo dõi chuyến đi         | Cho khách theo dõi trạng thái chuyến: đang tìm tài xế, tài xế đã nhận, ETA, tiến trình chuyến.                                                                                                                  |
+| **BG04** | Quản lý thanh toán & doanh thu tập trung | Tập trung dữ liệu giao dịch để đối soát, xác định cước theo loại dịch vụ, báo cáo doanh thu chính xác.                                                                                                          |
+| **BG05** | Thông báo đa kênh, dễ mở rộng            | Gửi thông báo cho khách & tài xế ở các mốc quan trọng; kiến trúc cho phép thêm kênh mới.                                                                                                                        |
+| **BG06** | Cung cấp công cụ vận hành & quản trị     | Giao diện quản trị để quản lý khách/tài xế/phương tiện/chuyến và xử lý chuyến lỗi.                                                                                                                              |
+| **BG07** | Hỗ trợ ra quyết định bằng báo cáo        | Báo cáo số chuyến, doanh thu, tỷ lệ hoàn thành/hủy, hiệu quả tài xế cho ban lãnh đạo.                                                                                                                           |
+| **BG08** | Đảm bảo độ ổn định khi tải cao           | Giữ hệ thống ổn định lúc cao điểm; lỗi thanh toán/thông báo không làm sập luồng đặt xe.                                                                                                                         |
+| **BG09** | Bảo mật & phân quyền                     | Xác thực người dùng, kiểm soát quyền cho thao tác quản trị, bảo vệ dữ liệu cá nhân/vị trí/giao dịch.                                                                                                            |
+| **BG10** | Lưu vết phục vụ kiểm tra                 | Ghi log thao tác quan trọng để truy vết và điều tra khi có sự cố.                                                                                                                                               |
 
 ## Bước 4: Xác định phạm vi (scope)
 
-### A. Trong phạm vi – Module cho MVP
+### A. Trong phạm vi 
 
 | Mã      | Module                  | Chức năng cốt lõi                                                                                    |
 |---------|-------------------------|------------------------------------------------------------------------------------------------------|
@@ -95,7 +97,7 @@ quadrantChart
 | **M09** | Xác thực & phân quyền   | Xác thực người dùng; kiểm soát quyền cho thao tác quản trị.                                          |
 | **M10** | Đánh giá sau chuyến     | Cho khách đánh giá tài xế sau khi hoàn thành chuyến.                                                 |
 
-**Mức ưu tiên (đã điều chỉnh để khớp luồng end-to-end):**
+**Mức ưu tiên:**
 
 - **Must-have (bắt buộc cho demo):** M01, M02, M03, M04, M05, **M06 (nhánh tiền mặt)**, M07, M09.
 - **Should-have:** M06 (nhánh điện tử), M08 (bản tối giản), M10.
@@ -227,7 +229,7 @@ quadrantChart
 | **BR11** | FR31 | Tính cước = **12.000đ + 10.000đ/km (default)** theo loại dịch vụ                                                                        |
 | **BR12** | FR32 | Cho khách chọn tiền mặt / điện tử                                                                                                       |
 |          | FR33 | Xác nhận thanh toán tiền mặt                                                                                                            |
-|          | FR34 | Gọi cổng thanh toán ngoài (không lưu thông tin thẻ)                                                                                     |
+|          | FR34 | Gọi cổng thanh toán ngoài (không lưu thông tin thẻ) – loại điện tử                                                                      |
 | **BR13** | FR35 | Nhận kết quả giao dịch (thành công/thất bại)                                                                                            |
 |          | FR36 | Thất bại → **thử lại 2 lần → chuyển tiền mặt (default)**                                                                                |
 | **BR14** | FR37 | TB khách: tiếp nhận yêu cầu                                                                                                             |
@@ -275,7 +277,7 @@ quadrantChart
 | **RULE18** | Mất kết nối ≤ **60 giây (default)** → giữ nguyên trạng thái, đồng bộ lại khi online (last-write-wins theo timestamp); quá hạn khi đang chạy chuyến → đánh dấu *cần vận hành* (EX04). | FR54            |
 | **RULE19** | Lưu trữ (default): chuyến & giao dịch **12 tháng**, vị trí tài xế **30 ngày**, audit **12 tháng**; sau đó archive/xoá theo chính sách.                                               | FR51, FR30      |
 
-### B. Exceptions (EX)
+### B. Exceptions (EX) – khác gì so với business rule
 
 | Mã       | Tình huống                                                       | Cách xử lý                                                                                                                                                                                                                         |
 |----------|------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -313,7 +315,7 @@ quadrantChart
 
 ### B. Sơ đồ ERD
 
-> **Lưu ý đọc sơ đồ:** `NOTIFICATION`, `DRIVER_LOCATION` và `AUDIT_LOG` được nối bằng quan hệ **đứt nét mang tính tham chiếu**. `NOTIFICATION` và `AUDIT_LOG` dùng cặp `(loai, id)` để trỏ **đa hình (polymorphic)** tới khách/tài xế/nhân viên nên **không** đặt FK cứng — đó là chủ ý thiết kế, không phải thiếu sót.
+> **Lưu ý đọc sơ đồ:** `NOTIFICATION`, `DRIVER_LOCATION` và `AUDIT_LOG` được nối bằng quan hệ **đứt nét mang tính tham chiếu**. `NOTIFICATION` và `AUDIT_LOG` dùng cặp `(loai, id)` để trỏ **đa hình (polymorphic)** tới khách/tài xế/nhân viên nên **không** đặt FK cứng — đó là chủ ý thiết kế, không phải thiếu sót. – tại sao dùng quan hệ đa hình
 
 ```mermaid
 erDiagram
@@ -423,6 +425,8 @@ erDiagram
     }
 ```
 
+Sơ đồ 2 — ERD
+
 ### C. Giải thích quan hệ chính
 
 Thực thể trung tâm là **TRIP**: một **CUSTOMER** tạo nhiều **TRIP**; một **DRIVER** thực hiện nhiều **TRIP**; mỗi **TRIP** thuộc một **SERVICE_TYPE** (cơ sở tính cước ở FR31).
@@ -439,22 +443,22 @@ Nhóm thực thể lõi cho MVP: CUSTOMER, DRIVER, VEHICLE, SERVICE_TYPE, TRIP, 
 
 ## Bước 10: Xác định & thiết kế non-functional requirement (NFR)
 
-| Mã        | Nhóm                            | Yêu cầu                                                                      | Định hướng MVP (7 tuần)                                                                                                                                    |
-|-----------|---------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **NFR01** | Performance                     | Đáp ứng thao tác cơ bản trong thời gian hợp lý.                              | Không đặt mục tiêu độ trễ cực thấp; đủ mượt cho demo.                                                                                                      |
-| **NFR02** | Scalability                     | Các thành phần mở rộng độc lập khi tải tăng.                                 | Thiết kế module/dịch vụ tách rời; chưa cần auto-scaling thật.                                                                                              |
-| **NFR03** | Reliability / Fault Isolation   | Lỗi thanh toán/thông báo không làm sập luồng đặt xe.                         | **Bắt buộc**: tách thanh toán & thông báo khỏi luồng lõi, xử lý lỗi cục bộ.                                                                                |
-| **NFR04** | Availability                    | Hoạt động ổn định giờ cao điểm.                                              | Ổn định cho demo; HA đầy đủ để giai đoạn scale-up.                                                                                                         |
-| **NFR05** | Maintainability / Extensibility | Thêm dịch vụ/thanh toán/kênh thông báo mà không xây lại toàn bộ.             | **Bắt buộc**: abstraction/interface cho payment & notification.                                                                                            |
-| **NFR06** | Deployability                   | Triển khai chức năng mới từng phần.                                          | Tách module rõ ràng; CI/CD đầy đủ làm sau.                                                                                                                 |
-| **NFR07** | Authentication                  | Khách & tài xế xác thực trước khi dùng chức năng cần tài khoản.              | **Bắt buộc** (đăng nhập + phiên/token).                                                                                                                    |
-| **NFR08** | Authorization                   | Thao tác quản trị nhạy cảm kiểm soát quyền theo vai trò.                     | **Bắt buộc**: phân quyền cơ bản.                                                                                                                           |
-| **NFR09** | Data Protection                 | Bảo vệ dữ liệu cá nhân/phương tiện/vị trí/giao dịch; không lưu thẻ nhạy cảm. | **Bắt buộc**: hash mật khẩu, điện tử qua provider ngoài.                                                                                                   |
-| **NFR10** | Auditability                    | Ghi vết thao tác quan trọng.                                                 | Log audit cơ bản cho thao tác quản trị & giao dịch.                                                                                                        |
-| **NFR11** | Resilience under load           | Không sụp đổ dây chuyền khi một thành phần quá tải.                          | Tách dịch vụ + hàng đợi cho tác vụ nền (thông báo).                                                                                                        |
-| **NFR12** | Configurability                 | Tham số nghiệp vụ để dạng cấu hình.                                          | **Bắt buộc**: bán kính, timeout, công thức cước, số lần retry, phí hủy, grace offline, retention ở config.                                                 |
-| **NFR13** | Data Retention                  | Vòng đời & thời gian lưu trữ dữ liệu.                                        | Default: chuyến & giao dịch **12 tháng**, vị trí tài xế **30 ngày**, audit **12 tháng**. MVP chỉ đặt tham số ở config; job dọn dữ liệu tự động làm sau.    |
-| **NFR14** | Usability                       | Giao diện rõ ràng, dễ thao tác; thông báo trạng thái & lỗi dễ hiểu.          | Bắt buộc ở mức tối thiểu cho demo: luồng đặt xe gọn (ít bước), hiển thị trạng thái chuyến & thông báo lỗi rõ ràng; chưa cần chuẩn UX/accessibility đầy đủ. |
+| Mã        | Nhóm                            | Yêu cầu                                                                      | Định hướng MVP (7 tuần)                                                                                                                                                 |
+|-----------|---------------------------------|------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **NFR01** | Performance                     | Đáp ứng thao tác cơ bản trong thời gian hợp lý.                              | Bắt buộc (mức tối thiểu): không tối ưu độ trễ, chỉ cần đủ mượt cho demo.                                                                                                |
+| **NFR02** | Scalability                     | Các thành phần mở rộng độc lập khi tải tăng.                                 | Bắt buộc (thiết kế tách rời theo module/dịch vụ); auto-scaling thật: định hướng tương lai.                                                                              |
+| **NFR03** | Reliability / Fault Isolation   | Lỗi thanh toán/thông báo không làm sập luồng đặt xe.                         | Bắt buộc (MVP): tách thanh toán & thông báo khỏi luồng lõi, xử lý lỗi cục bộ.                                                                                           |
+| **NFR04** | Availability                    | Hoạt động ổn định giờ cao điểm.                                              | Bắt buộc (mức ổn định cho demo); HA đầy đủ: định hướng tương lai (giai đoạn scale-up).                                                                                  |
+| **NFR05** | Maintainability / Extensibility | Thêm dịch vụ/thanh toán/kênh thông báo mà không xây lại toàn bộ.             | Bắt buộc (MVP): abstraction/interface cho payment & notification.                                                                                                       |
+| **NFR06** | Deployability                   | Triển khai chức năng mới từng phần.                                          | Bắt buộc (tách module rõ ràng); CI/CD đầy đủ: định hướng tương lai.                                                                                                     |
+| **NFR07** | Authentication                  | Khách & tài xế xác thực trước khi dùng chức năng cần tài khoản.              | Bắt buộc (MVP): đăng nhập + phiên/token.                                                                                                                                |
+| **NFR08** | Authorization                   | Thao tác quản trị nhạy cảm kiểm soát quyền theo vai trò.                     | Bắt buộc (MVP): phân quyền cơ bản.                                                                                                                                      |
+| **NFR09** | Data Protection                 | Bảo vệ dữ liệu cá nhân/phương tiện/vị trí/giao dịch; không lưu thẻ nhạy cảm. | Bắt buộc (MVP): hash mật khẩu, điện tử qua provider ngoài.                                                                                                              |
+| **NFR10** | Auditability                    | Ghi vết thao tác quan trọng.                                                 | Bắt buộc (mức cơ bản): log audit cho thao tác quản trị & giao dịch.                                                                                                     |
+| **NFR11** | Resilience under load           | Không sụp đổ dây chuyền khi một thành phần quá tải.                          | Bắt buộc (mức thiết kế cơ bản): tách dịch vụ + hàng đợi cho tác vụ nền; chịu tải cao thực tế: định hướng tương lai.                                                     |
+| **NFR12** | Configurability                 | Tham số nghiệp vụ để dạng cấu hình.                                          | Bắt buộc (MVP): bán kính, timeout, công thức cước, số lần retry, phí hủy, grace offline, retention ở config.                                                            |
+| **NFR13** | Data Retention                  | Vòng đời & thời gian lưu trữ dữ liệu.                                        | Bắt buộc (đặt tham số ở config: chuyến & giao dịch 12 tháng, vị trí tài xế 30 ngày, audit 12 tháng); job dọn dữ liệu tự động: định hướng tương lai.                     |
+| **NFR14** | Usability                       | Giao diện rõ ràng, dễ thao tác; thông báo trạng thái & lỗi dễ hiểu.          | Bắt buộc (mức tối thiểu cho demo): luồng đặt xe gọn (ít bước), hiển thị trạng thái chuyến & thông báo lỗi rõ ràng; chuẩn UX/accessibility đầy đủ: định hướng tương lai. |
 
 ## Bước 11: Vẽ Use Case (14 UC lõi – MVP)
 
@@ -525,6 +529,9 @@ graph LR
     classDef actor fill:#cfe3ff,stroke:#2b6cb0,stroke-width:1px,font-weight:bold;
 ```
 
+*Sơ đồ 3 — Use Case (14 UC)*
+
+Sơ đồ 3 — Use Case (14 UC)
 
 ### C. Quan hệ include/extend
 
@@ -532,153 +539,428 @@ Ba `include` cốt lõi: UC03 include UC12 (đặt xe kéo theo tìm tài xế),
 
 ## Bước 12: Đặc tả Use Case (14 UC)
 
-### UC01 — Đăng ký / Đăng nhập (Customer, Driver)
+> Đặc tả chi tiết theo format: Actor chính / Mô tả / Business rule / Tiền–Hậu điều kiện / Luồng sự kiện chính & Luồng ngoại lệ (bảng Actor–Hệ thống).
 
-| Mục            | Nội dung                                                                                                                                       |
-|----------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Khách hàng, Tài xế (tự đăng ký hoặc do nhân viên vận hành tạo)                                                                                 |
-| Tiền điều kiện | Chưa đăng nhập                                                                                                                                 |
-| Luồng chính    | 1\) Nhập thông tin đăng ký (hoặc định danh + mật khẩu). 2) Hệ thống kiểm tra & tạo tài khoản / cấp phiên. 3) Vào được chức năng cần tài khoản. |
-| Ngoại lệ       | Định danh đã tồn tại → báo lỗi; sai mật khẩu → từ chối, khóa sau N lần sai.                                                                    |
-| Rule           | RULE13.                                                                                                                                        |
+### UC01 — Đăng ký / Đăng nhập
 
-### UC02 — Quản lý hồ sơ cá nhân (Customer)
+| Mục            | Nội dung                                                                                                                                                                                                                               |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC01                                                                                                                                                                                                                                   |
+| Tên            | Đăng ký / Đăng nhập (Customer, Driver) — gồm 2 luồng con: A. Đăng ký · B. Đăng nhập                                                                                                                                                    |
+| Actor chính    | CUSTOMER, DRIVER                                                                                                                                                                                                                       |
+| Mô tả          | Khách hàng và tài xế tạo tài khoản mới (luồng A) hoặc đăng nhập vào tài khoản đã có (luồng B) để dùng các chức năng cần tài khoản. Tài xế có thể tự đăng ký hoặc do nhân viên vận hành tạo.                                            |
+| Business rule  | — Chung: Định danh (SĐT/email) là duy nhất; phải xác thực trước khi dùng chức năng cần tài khoản (RULE13). — Đăng ký: Tài xế tự đăng ký hoặc do NV vận hành tạo (FR05). — Đăng nhập: Khóa tài khoản sau N lần đăng nhập sai (default). |
+| Tiền điều kiện | Luồng A: chưa có tài khoản với định danh này. Luồng B: đã có tài khoản, chưa đăng nhập.                                                                                                                                                |
+| Hậu điều kiện  | Luồng A: tài khoản được tạo, sau đó tự động chuyển sang luồng B để cấp phiên. Luồng B: phiên (session/token) được cấp; vào được chức năng cần tài khoản.                                                                               |
 
-| Mục            | Nội dung                                                   |
-|----------------|------------------------------------------------------------|
-| Tác nhân       | Khách hàng                                                 |
-| Tiền điều kiện | Đã đăng nhập                                               |
-| Luồng chính    | 1\) Xem hồ sơ. 2) Sửa thông tin. 3) Kiểm tra hợp lệ & lưu. |
-| Ngoại lệ       | Trường bắt buộc thiếu/không hợp lệ → từ chối lưu.          |
-| Rule           | Chỉ chủ tài khoản mới sửa được hồ sơ của mình.             |
+**Luồng sự kiện chính**
 
-### UC03 — Đặt chuyến xe (Customer)
+***A. Đăng ký tài khoản mới***
 
-| Mục            | Nội dung                                                                                                                 |
-|----------------|--------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Khách hàng                                                                                                               |
-| Tiền điều kiện | Đã đăng nhập (UC01)                                                                                                      |
-| Hậu điều kiện  | Tạo chuyến *đang tìm tài xế*; kích hoạt UC12                                                                             |
-| Luồng chính    | 1\) Nhập điểm đón/đến. 2) Chọn loại xe. 3) Gửi yêu cầu. 4) Kiểm tra & tạo chuyến. 5) Xác nhận tiếp nhận. 6) Chuyển UC12. |
-| Ngoại lệ       | Thiếu điểm đón/đến → báo lỗi; loại xe không khả dụng → chọn lại.                                                         |
-| Rule           | RULE13.                                                                                                                  |
+| Actor                                                                | Hệ thống                                                 |
+|----------------------------------------------------------------------|----------------------------------------------------------|
+| 1\. Nhập thông tin đăng ký (định danh + mật khẩu + thông tin cơ bản) |                                                          |
+| 2\. Gửi yêu cầu đăng ký                                              |                                                          |
+|                                                                      | 3\. Kiểm tra định danh & thông tin hợp lệ (FR01/FR05)    |
+|                                                                      | 4\. Tạo tài khoản                                        |
+|                                                                      | 5\. Tự động chuyển sang luồng B (Đăng nhập) để cấp phiên |
 
-### UC04 — Theo dõi chuyến đi (Customer)
+***B. Đăng nhập***
 
-| Mục            | Nội dung                                                                                |
-|----------------|-----------------------------------------------------------------------------------------|
-| Tác nhân       | Khách hàng                                                                              |
-| Tiền điều kiện | Có chuyến đang xử lý                                                                    |
-| Luồng chính    | 1\) Truy vấn trạng thái chuyến. 2) Xem: đang tìm / đã nhận / ETA / trạng thái hiện tại. |
-| Ngoại lệ       | Chưa có tài xế → hiển thị “đang tìm tài xế”.                                            |
-| Rule           | RULE16.                                                                                 |
+| Actor                         | Hệ thống                                               |
+|-------------------------------|--------------------------------------------------------|
+| 1\. Nhập định danh + mật khẩu |                                                        |
+| 2\. Gửi yêu cầu đăng nhập     |                                                        |
+|                               | 3\. Kiểm tra định danh & mật khẩu hợp lệ (FR02)        |
+|                               | 4\. Cấp phiên (session/token)                          |
+|                               | 5\. Hiển thị xác nhận, cho vào chức năng cần tài khoản |
 
-### UC05 — Thanh toán chuyến (Customer)
+**Luồng ngoại lệ**
 
-| Mục             | Nội dung                                                                                                                                           |
-|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân        | Khách hàng (phụ: Nhà cung cấp thanh toán khi điện tử)                                                                                              |
-| Tiền điều kiện  | Chuyến hoàn thành & đã tính cước (UC13)                                                                                                            |
-| Hậu điều kiện   | Chuyến ở trạng thái *đã thanh toán*                                                                                                                |
-| Luồng chính     | 1\) Hiển thị số tiền. 2) Chọn tiền mặt / điện tử. 3a) Tiền mặt → xác nhận. 3b) Điện tử → gọi provider ngoài. 4) Cập nhật kết quả, thông báo khách. |
-| Ngoại lệ        | Điện tử thất bại → **thử lại 2 lần → chuyển tiền mặt (default)** (EX03).                                                                           |
-| Rule            | RULE10.                                                                                                                                            |
-| Default áp dụng | Retry 2 lần → fallback tiền mặt. MVP ưu tiên demo nhánh tiền mặt trước.                                                                            |
+***A. Ngoại lệ khi đăng ký***
 
-### UC06 — Đánh giá tài xế (Customer)
+| Actor                                       | Hệ thống                                     |
+|---------------------------------------------|----------------------------------------------|
+| 2a. Định danh đã tồn tại                    | 3a. Báo lỗi trùng định danh. Quay lại bước 1 |
+| 2b. Thông tin bắt buộc thiếu / không hợp lệ | 3b. Từ chối, báo lỗi. Quay lại bước 1        |
 
-| Mục            | Nội dung                                                             |
-|----------------|----------------------------------------------------------------------|
-| Tác nhân       | Khách hàng                                                           |
-| Tiền điều kiện | Chuyến đã hoàn thành                                                 |
-| Luồng chính    | 1\) Chọn số sao + nhận xét. 2) Lưu đánh giá gắn với chuyến & tài xế. |
-| Ngoại lệ       | Chuyến chưa hoàn thành → không cho đánh giá.                         |
-| Rule           | RULE11.                                                              |
+***B. Ngoại lệ khi đăng nhập***
 
-### UC07 — Xem lịch sử chuyến (Customer)
+| Actor                                                   | Hệ thống                                             |
+|---------------------------------------------------------|------------------------------------------------------|
+| 2a. Sai mật khẩu                                        | 3a. Từ chối; khóa tài khoản sau N lần sai (default)  |
+| 2b. Định danh không tồn tại                             | 3b. Báo lỗi tài khoản không tồn tại. Quay lại bước 1 |
+| 1c. Chưa xác thực mà gọi chức năng cần tài khoản (EX06) | Yêu cầu đăng nhập trước (RULE13)                     |
 
-| Mục            | Nội dung                                                 |
-|----------------|----------------------------------------------------------|
-| Tác nhân       | Khách hàng                                               |
-| Tiền điều kiện | Đã đăng nhập                                             |
-| Luồng chính    | 1\) Mở lịch sử. 2) Trả danh sách chuyến đã đi + số tiền. |
-| Ngoại lệ       | Chưa có chuyến → danh sách rỗng.                         |
-| Rule           | RULE16.                                                  |
+### UC02 — Quản lý hồ sơ cá nhân
 
-### UC08 — Quản lý hồ sơ & phương tiện (Driver)
+| Mục            | Nội dung                                                                                                                                                                                                                                |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC02                                                                                                                                                                                                                                    |
+| Tên            | Quản lý hồ sơ cá nhân (Customer)                                                                                                                                                                                                        |
+| Actor chính    | CUSTOMER                                                                                                                                                                                                                                |
+| Mô tả          | Khách hàng xem và cập nhật thông tin cá nhân của mình: họ tên, số điện thoại, email.                                                                                                                                                    |
+| Business rule  | • Chỉ chủ tài khoản mới sửa được hồ sơ của mình (RULE16)• Trường bắt buộc phải hợp lệ mới lưu• Họ tên: bắt buộc, không giới hạn định dạng đặc biệt• Số điện thoại: đúng định dạng, 10 chữ số• Email: đúng định dạng email (nếu có nhập) |
+| Tiền điều kiện | Đã đăng nhập.                                                                                                                                                                                                                           |
+| Hậu điều kiện  | Thông tin cá nhân được cập nhật và lưu lại.                                                                                                                                                                                             |
 
-| Mục            | Nội dung                                                                       |
-|----------------|--------------------------------------------------------------------------------|
-| Tác nhân       | Tài xế                                                                         |
-| Tiền điều kiện | Đã đăng nhập                                                                   |
-| Luồng chính    | 1\) Cập nhật hồ sơ tài xế. 2) Cập nhật phương tiện (biển số, loại xe). 3) Lưu. |
-| Ngoại lệ       | Thiếu trường bắt buộc → từ chối lưu.                                           |
-| Rule           | Một tài xế gắn đúng phương tiện hợp lệ (dùng lọc loại xe ở UC12).              |
+**Luồng sự kiện chính**
 
-### UC09 — Đổi trạng thái sẵn sàng (Driver)
+| Actor                                           | Hệ thống                              |
+|-------------------------------------------------|---------------------------------------|
+| 1\. Mở hồ sơ cá nhân                            |                                       |
+| 2\. Sửa thông tin: họ tên, số điện thoại, email |                                       |
+| 3\. Bấm Lưu                                     |                                       |
+|                                                 | 4\. Kiểm tra các trường hợp lệ (FR03) |
+|                                                 | 5\. Lưu thay đổi và hiển thị xác nhận |
 
-| Mục            | Nội dung                                                  |
-|----------------|-----------------------------------------------------------|
-| Tác nhân       | Tài xế                                                    |
-| Tiền điều kiện | Đã đăng nhập, đang trong ca làm việc                      |
-| Luồng chính    | 1\) Chọn sẵn sàng / không sẵn sàng. 2) Hệ thống cập nhật. |
-| Ngoại lệ       | Không trong ca → không cho chuyển sẵn sàng.               |
-| Rule           | RULE01, RULE02.                                           |
+**Luồng ngoại lệ**
 
-### UC10 — Nhận & phản hồi chuyến (Driver)
+| Actor                                       | Hệ thống                                  |
+|---------------------------------------------|-------------------------------------------|
+| 3a. Trường bắt buộc thiếu hoặc không hợp lệ | 4a. Từ chối lưu, báo lỗi. Quay lại bước 2 |
 
-| Mục            | Nội dung                                                                                                       |
-|----------------|----------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Tài xế                                                                                                         |
-| Tiền điều kiện | Tài xế *sẵn sàng*; nhận đề xuất từ UC12                                                                        |
-| Hậu điều kiện  | Chuyến được gán (nếu chấp nhận) hoặc chuyển tài xế khác                                                        |
-| Luồng chính    | 1\) Nhận thông báo chuyến mới. 2) Xem thông tin chuyến. 3) Chấp nhận → gán tài xế, thông báo khách.            |
-| Ngoại lệ       | Từ chối → chuyển tài xế kế tiếp (EX02); không phản hồi trong **20 giây (default)** → coi như từ chối (RULE06). |
-| Rule           | RULE01, RULE03.                                                                                                |
+### UC03 — Đặt chuyến xe
 
-### UC11 — Cập nhật tiến trình chuyến (Driver)
+| Mục            | Nội dung                                                                                                                                            |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC03                                                                                                                                                |
+| Tên            | Đặt chuyến xe (Customer)                                                                                                                            |
+| Actor chính    | CUSTOMER                                                                                                                                            |
+| Mô tả          | Khách nhập điểm đón/đến, chọn loại xe và gửi yêu cầu tạo chuyến. Hệ thống tạo chuyến ở trạng thái *đang tìm tài xế* và kích hoạt tìm tài xế (UC12). |
+| Business rule  | • Phải đăng nhập (RULE13)• Điểm đón & điểm đến là bắt buộc• Loại xe phải hợp lệ/khả dụng• Tạo chuyến ở trạng thái *đang tìm tài xế* → include UC12  |
+| Tiền điều kiện | Đã đăng nhập.                                                                                                                                       |
+| Hậu điều kiện  | Chuyến được tạo ở trạng thái *đang tìm tài xế*; UC12 được kích hoạt.                                                                                |
 
-| Mục            | Nội dung                                                                               |
-|----------------|----------------------------------------------------------------------------------------|
-| Tác nhân       | Tài xế                                                                                 |
-| Tiền điều kiện | Đã được gán chuyến (UC10)                                                              |
-| Hậu điều kiện  | Chuyến *hoàn thành* → kích hoạt UC13                                                   |
-| Luồng chính    | 1\) “đã đến điểm đón”. 2) “đã đón khách”. 3) “đang di chuyển”. 4) “hoàn thành chuyến”. |
-| Ngoại lệ       | Cập nhật sai thứ tự → từ chối (EX08).                                                  |
-| Rule           | RULE08.                                                                                |
+**Luồng sự kiện chính**
 
-### UC12 — Tìm & phân công tài xế (System)
+| Actor                           | Hệ thống                                                              |
+|---------------------------------|-----------------------------------------------------------------------|
+| 1\. Nhập điểm đón và điểm đến   |                                                                       |
+| 2\. Chọn loại xe / loại dịch vụ |                                                                       |
+| 3\. Gửi yêu cầu đặt chuyến      |                                                                       |
+|                                 | 4\. Chuẩn hoá điểm đón/đến, kiểm tra loại xe (FR09/FR10)              |
+|                                 | 5\. Tạo chuyến (*đang tìm tài xế*) và thông báo tiếp nhận (FR11/FR37) |
+|                                 | 6\. Kích hoạt tìm & phân công tài xế (UC12)                           |
 
-| Mục            | Nội dung                                                                                                                                                                                                                                                                                |
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Hệ thống (kích hoạt từ UC03); phụ: Tài xế qua UC10                                                                                                                                                                                                                                      |
-| Tiền điều kiện | Có chuyến *đang tìm tài xế*                                                                                                                                                                                                                                                             |
-| Hậu điều kiện  | Gán được tài xế hoặc thông báo “không tìm được tài xế”                                                                                                                                                                                                                                  |
-| Luồng chính    | 1\) Xác định vị trí khách. 2) Lọc tài xế sẵn sàng trong **bán kính 1 km (default)**. 3) Lọc theo loại xe. 4) Xếp ưu tiên **gần nhất → đánh giá cao hơn (default)**. 5) Chọn ứng viên đầu. 6) Gửi đề xuất (UC10), chờ **20 giây (default)**. 7) Chấp nhận → gán tài xế, thông báo khách. |
-| Ngoại lệ       | Từ chối/hết giờ → chọn tài xế kế tiếp (EX02); dừng sau **5 ứng viên hoặc 120 giây (default)** → thông báo “không tìm được tài xế” (EX01).                                                                                                                                               |
-| Rule           | RULE01, RULE03, RULE04, RULE05, RULE06.                                                                                                                                                                                                                                                 |
+**Luồng ngoại lệ**
 
-### UC13 — Tính cước (System)
+| Actor                            | Hệ thống                                                                       |
+|----------------------------------|--------------------------------------------------------------------------------|
+| 3a. Thiếu điểm đón hoặc điểm đến | 4a. Báo lỗi thiếu thông tin. Quay lại bước 1                                   |
+| 2b. Loại xe không khả dụng       | 4b. Thông báo và yêu cầu chọn lại. Quay lại bước 2                             |
+|                                  | 6c. Không tìm được tài xế (EX01) → thông báo “không tìm được tài xế”. Kết thúc |
 
-| Mục            | Nội dung                                                                                                                     |
-|----------------|------------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Hệ thống (kích hoạt từ UC11)                                                                                                 |
-| Tiền điều kiện | Chuyến *hoàn thành*                                                                                                          |
-| Hậu điều kiện  | Có số tiền phải trả → chuyển UC05                                                                                            |
-| Luồng chính    | 1\) Lấy loại dịch vụ + thông tin chuyến. 2) Áp công thức **12.000đ + 10.000đ/km (default)**. 3) Ghi nhận số tiền cho chuyến. |
-| Ngoại lệ       | Thiếu dữ liệu chuyến → chưa tính được, chờ bổ sung.                                                                          |
-| Rule           | RULE09.                                                                                                                      |
+### UC04 — Theo dõi chuyến đi
 
-### UC14 — Quản trị & vận hành (Operations Staff)
+| Mục            | Nội dung                                                                                                  |
+|----------------|-----------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC04                                                                                                      |
+| Tên            | Theo dõi chuyến đi (Customer)                                                                             |
+| Actor chính    | CUSTOMER                                                                                                  |
+| Mô tả          | Khách theo dõi trạng thái chuyến theo thời gian: đang tìm tài xế, tài xế đã nhận, ETA, tiến trình chuyến. |
+| Business rule  | • Chỉ xem chuyến của chính mình (RULE16)• Trạng thái hiển thị theo đúng vòng đời chuyến                   |
+| Tiền điều kiện | Có chuyến đang xử lý, đăng nhập thành công                                                                |
+| Hậu điều kiện  | Khách thấy trạng thái và ETA hiện tại của chuyến.                                                         |
 
-| Mục            | Nội dung                                                                                                                                                                |
-|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Tác nhân       | Nhân viên vận hành (phân quyền theo ROLE)                                                                                                                               |
-| Tiền điều kiện | Đã đăng nhập & có quyền vận hành                                                                                                                                        |
-| Luồng chính    | 1\) Xem danh sách chuyến đang diễn ra + trạng thái tài xế. 2) Quản lý (CRUD) khách/tài xế/phương tiện/chuyến. 3) Hỗ trợ xử lý chuyến lỗi. 4) Tra cứu lịch sử giao dịch. |
-| Ngoại lệ       | Nhân viên thường cố thao tác nhạy cảm → từ chối (EX07).                                                                                                                 |
-| Rule           | RULE12 (phân quyền), RULE14 (ghi log audit).                                                                                                                            |
-| Phạm vi MVP    | Chỉ bắt buộc màn hình **xem danh sách chuyến + trạng thái tài xế**; CRUD đầy đủ & tra cứu giao dịch là Should-have.                                                     |
+**Luồng sự kiện chính**
+
+| Actor                           | Hệ thống                                                          |
+|---------------------------------|-------------------------------------------------------------------|
+| 1\. Mở màn hình theo dõi chuyến |                                                                   |
+|                                 | 2\. Truy vấn trạng thái chuyến hiện tại (FR24)                    |
+|                                 | 3\. Hiển thị: đang tìm tài xế / đã nhận / ETA / tiến trình (FR25) |
+
+**Luồng ngoại lệ**
+
+| Actor                              | Hệ thống                                                             |
+|------------------------------------|----------------------------------------------------------------------|
+|                                    | 2a. Chưa có tài xế nhận → hiển thị “đang tìm tài xế”                 |
+| 3b. Mất kết nối giữa chuyến (EX09) | Cho reconnect trong 60 giây (default), đồng bộ trạng thái khi online |
+
+### UC05 — Thanh toán chuyến
+
+| Mục            | Nội dung                                                                                                                                                                                                                                     |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC05                                                                                                                                                                                                                                         |
+| Tên            | Thanh toán chuyến (Customer) — *extend* UC11                                                                                                                                                                                                 |
+| Actor chính    | CUSTOMER                                                                                                                                                                                                                                     |
+| Mô tả          | Sau khi chuyến hoàn thành và đã tính cước, khách thanh toán bằng tiền mặt hoặc phương thức điện tử qua cổng ngoài.                                                                                                                           |
+| Business rule  | • Chỉ thanh toán khi chuyến hoàn thành & đã có cước (UC13)• Không lưu thông tin thẻ/tài khoản nhạy cảm (RULE10)• Điện tử thất bại → thử lại 2 lần → chuyển tiền mặt (default, EX03)• Lỗi thanh toán không được làm sập luồng đặt xe (RULE15) |
+| Tiền điều kiện | Chuyến đã hoàn thành và đã sinh FARE (UC13).                                                                                                                                                                                                 |
+| Hậu điều kiện  | Giao dịch được ghi nhận; khách được thông báo kết quả thanh toán (FR41).                                                                                                                                                                     |
+
+**Luồng sự kiện chính**
+
+| Actor                                              | Hệ thống                                                                |
+|----------------------------------------------------|-------------------------------------------------------------------------|
+| 1\. Chọn phương thức: tiền mặt hoặc điện tử (FR32) |                                                                         |
+|                                                    | 2\. Nếu tiền mặt → xác nhận đã thu tiền (FR33)                          |
+|                                                    | 3\. Nếu điện tử → gọi cổng thanh toán ngoài (FR34), nhận kết quả (FR35) |
+|                                                    | 4\. Ghi nhận giao dịch và thông báo kết quả (FR41)                      |
+
+**Luồng ngoại lệ**
+
+| Actor | Hệ thống                                                                             |
+|-------|--------------------------------------------------------------------------------------|
+|       | 3a. Điện tử thất bại (EX03) → thử lại 2 lần → chuyển tiền mặt + thông báo khách      |
+|       | 3b. Thành phần thanh toán lỗi (EX05/RULE15) → không gián đoạn luồng, chuyển tiền mặt |
+
+### UC06 — Đánh giá tài xế
+
+| Mục            | Nội dung                                                                        |
+|----------------|---------------------------------------------------------------------------------|
+| Mã use case    | UC06                                                                            |
+| Tên            | Đánh giá tài xế (Customer) — *extend* UC11                                      |
+| Actor chính    | CUSTOMER                                                                        |
+| Mô tả          | Sau khi chuyến hoàn thành, khách đánh giá tài xế (số sao và nhận xét).          |
+| Business rule  | • Chỉ đánh giá sau khi chuyến hoàn thành (RULE11)• Mỗi chuyến tối đa 1 đánh giá |
+| Tiền điều kiện | Chuyến đã hoàn thành.                                                           |
+| Hậu điều kiện  | Đánh giá được lưu; điểm đánh giá của tài xế được cập nhật.                      |
+
+**Luồng sự kiện chính**
+
+| Actor                            | Hệ thống                                               |
+|----------------------------------|--------------------------------------------------------|
+| 1\. Chọn số sao và nhập nhận xét |                                                        |
+| 2\. Gửi đánh giá                 |                                                        |
+|                                  | 3\. Kiểm tra chuyến đã hoàn thành & chưa được đánh giá |
+|                                  | 4\. Lưu đánh giá (FR44), cập nhật điểm tài xế          |
+|                                  | 5\. Hiển thị xác nhận                                  |
+
+**Luồng ngoại lệ**
+
+| Actor                                | Hệ thống                                |
+|--------------------------------------|-----------------------------------------|
+| 2a. Chuyến chưa hoàn thành           | 3a. Từ chối đánh giá (RULE11). Kết thúc |
+| 2b. Chuyến đã được đánh giá trước đó | 3b. Thông báo đã đánh giá. Kết thúc     |
+
+### UC07 — Xem lịch sử chuyến
+
+| Mục            | Nội dung                                                        |
+|----------------|-----------------------------------------------------------------|
+| Mã use case    | UC07                                                            |
+| Tên            | Xem lịch sử chuyến (Customer)                                   |
+| Actor chính    | CUSTOMER                                                        |
+| Mô tả          | Khách xem danh sách các chuyến đã đi kèm số tiền và trạng thái. |
+| Business rule  | • Chỉ xem lịch sử của chính mình (RULE16)                       |
+| Tiền điều kiện | Đã đăng nhập.                                                   |
+| Hậu điều kiện  | Hiển thị danh sách chuyến và số tiền tương ứng.                 |
+
+**Luồng sự kiện chính**
+
+| Actor                          | Hệ thống                                                          |
+|--------------------------------|-------------------------------------------------------------------|
+| 1\. Mở màn hình lịch sử chuyến |                                                                   |
+|                                | 2\. Truy vấn các chuyến của khách (FR04)                          |
+|                                | 3\. Hiển thị danh sách: thời gian, điểm đón/đến, cước, trạng thái |
+
+**Luồng ngoại lệ**
+
+| Actor | Hệ thống                                         |
+|-------|--------------------------------------------------|
+|       | 2a. Chưa có chuyến nào → hiển thị danh sách rỗng |
+
+### UC08 — Quản lý hồ sơ & phương tiện
+
+| Mục            | Nội dung                                                                                                        |
+|----------------|-----------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC08                                                                                                            |
+| Tên            | Quản lý hồ sơ & phương tiện (Driver)                                                                            |
+| Actor chính    | DRIVER                                                                                                          |
+| Mô tả          | Tài xế cập nhật hồ sơ cá nhân và thông tin phương tiện gắn với mình.                                            |
+| Business rule  | • Chỉ tài xế chủ tài khoản mới sửa được (tương tự RULE16)• Thông tin phương tiện phải hợp lệ (loại xe, biển số) |
+| Tiền điều kiện | Đã đăng nhập với vai trò tài xế.                                                                                |
+| Hậu điều kiện  | Hồ sơ và thông tin phương tiện được lưu.                                                                        |
+
+**Luồng sự kiện chính**
+
+| Actor                                             | Hệ thống                              |
+|---------------------------------------------------|---------------------------------------|
+| 1\. Mở hồ sơ / thông tin phương tiện              |                                       |
+| 2\. Cập nhật hồ sơ (FR06) hoặc phương tiện (FR07) |                                       |
+| 3\. Bấm Lưu                                       |                                       |
+|                                                   | 4\. Kiểm tra thông tin hợp lệ         |
+|                                                   | 5\. Lưu thay đổi và hiển thị xác nhận |
+
+**Luồng ngoại lệ**
+
+| Actor                                  | Hệ thống                                  |
+|----------------------------------------|-------------------------------------------|
+| 3a. Thông tin phương tiện không hợp lệ | 4a. Từ chối lưu, báo lỗi. Quay lại bước 2 |
+
+### UC09 — Đổi trạng thái sẵn sàng
+
+| Mục            | Nội dung                                                                                                                                                                           |
+|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC09                                                                                                                                                                               |
+| Tên            | Đổi trạng thái sẵn sàng (Driver)                                                                                                                                                   |
+| Actor chính    | DRIVER                                                                                                                                                                             |
+| Mô tả          | Tài xế bật/tắt trạng thái sẵn sàng để được (hoặc không được) hệ thống đề xuất chuyến.                                                                                              |
+| Business rule  | • Chỉ tài xế *available* mới được đề xuất chuyến (RULE01)• Chỉ chuyển sang sẵn sàng khi đang trong ca làm việc (RULE02)• Không chuyển sang *available* khi đang có chuyến (RULE03) |
+| Tiền điều kiện | Đã đăng nhập với vai trò tài xế.                                                                                                                                                   |
+| Hậu điều kiện  | Trạng thái sẵn sàng của tài xế được cập nhật.                                                                                                                                      |
+
+**Luồng sự kiện chính**
+
+| Actor                                    | Hệ thống                                            |
+|------------------------------------------|-----------------------------------------------------|
+| 1\. Bật / tắt trạng thái sẵn sàng (FR08) |                                                     |
+|                                          | 2\. Kiểm tra đang trong ca & không đang chạy chuyến |
+|                                          | 3\. Cập nhật trạng thái và hiển thị xác nhận        |
+
+**Luồng ngoại lệ**
+
+| Actor                       | Hệ thống                                |
+|-----------------------------|-----------------------------------------|
+| 1a. Ngoài ca làm việc       | 2a. Từ chối chuyển sẵn sàng (RULE02)    |
+| 1b. Đang có chuyến được gán | 2b. Từ chối chuyển *available* (RULE03) |
+
+### UC10 — Nhận & phản hồi chuyến
+
+| Mục            | Nội dung                                                                                                                                                                                        |
+|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC10                                                                                                                                                                                            |
+| Tên            | Nhận & phản hồi chuyến (Driver) — *included by* UC12                                                                                                                                            |
+| Actor chính    | DRIVER                                                                                                                                                                                          |
+| Mô tả          | Tài xế nhận đề xuất chuyến từ hệ thống và chấp nhận hoặc từ chối trong thời hạn cho phép.                                                                                                       |
+| Business rule  | • Phải phản hồi trong 20 giây (default); quá hạn = từ chối (RULE06)• Từ chối/hết giờ → hệ thống tự chuyển tài xế kế tiếp (RULE07)• Chấp nhận → gán chuyến; không gán 2 chuyến cùng lúc (RULE03) |
+| Tiền điều kiện | Tài xế đang *available* và nhận được đề xuất chuyến.                                                                                                                                            |
+| Hậu điều kiện  | Chấp nhận: chuyến được gán cho tài xế. Từ chối/timeout: chuyến chuyển sang tài xế kế tiếp.                                                                                                      |
+
+**Luồng sự kiện chính**
+
+| Actor                                | Hệ thống                                                                 |
+|--------------------------------------|--------------------------------------------------------------------------|
+| 1\. Nhận thông báo chuyến mới (FR21) |                                                                          |
+| 2\. Chấp nhận hoặc từ chối (FR22)    |                                                                          |
+|                                      | 3\. Nếu chấp nhận → gán tài xế vào chuyến (FR23), thông báo khách (FR38) |
+|                                      | 4\. Cập nhật trạng thái chuyến                                           |
+
+**Luồng ngoại lệ**
+
+| Actor                                     | Hệ thống                                         |
+|-------------------------------------------|--------------------------------------------------|
+| 2a. Tài xế từ chối (EX02)                 | Loại tài xế này, tự chọn tài xế kế tiếp (RULE07) |
+| 2b. Không phản hồi trong 20 giây (RULE06) | Coi như từ chối, chuyển tài xế kế tiếp           |
+
+### UC11 — Cập nhật tiến trình chuyến
+
+| Mục            | Nội dung                                                                                                                    |
+|----------------|-----------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC11                                                                                                                        |
+| Tên            | Cập nhật tiến trình chuyến (Driver) — *include* UC13                                                                        |
+| Actor chính    | DRIVER                                                                                                                      |
+| Mô tả          | Tài xế cập nhật vòng đời chuyến theo đúng thứ tự; khi hoàn thành, hệ thống kích hoạt tính cước (UC13).                      |
+| Business rule  | • Trạng thái đúng thứ tự: đến điểm đón → đón khách → di chuyển → hoàn thành (RULE08)• Hoàn thành → include tính cước (UC13) |
+| Tiền điều kiện | Tài xế đã được gán chuyến.                                                                                                  |
+| Hậu điều kiện  | Trạng thái chuyến được cập nhật; khi hoàn thành sinh FARE (UC13) và mở nhánh thanh toán/đánh giá (UC05/UC06).               |
+
+**Luồng sự kiện chính**
+
+| Actor                                   | Hệ thống                                             |
+|-----------------------------------------|------------------------------------------------------|
+| 1\. Cập nhật “đã đến điểm đón” (FR26)   |                                                      |
+| 2\. Cập nhật “đã đón khách” (FR27)      |                                                      |
+| 3\. Cập nhật “đang di chuyển” (FR28)    |                                                      |
+| 4\. Cập nhật “hoàn thành chuyến” (FR29) |                                                      |
+|                                         | 5\. Kiểm tra cập nhật đúng thứ tự (RULE08)           |
+|                                         | 6\. Ghi nhận trạng thái, thông báo khách (FR39/FR40) |
+|                                         | 7\. Khi hoàn thành → kích hoạt tính cước (UC13)      |
+
+**Luồng ngoại lệ**
+
+| Actor                                   | Hệ thống                                                  |
+|-----------------------------------------|-----------------------------------------------------------|
+| 1a. Cập nhật sai thứ tự vòng đời (EX08) | Từ chối cập nhật không hợp lệ, giữ đúng trình tự (RULE08) |
+| 4b. Mất kết nối giữa chuyến (EX09)      | Cho reconnect 60 giây (default), đồng bộ khi online       |
+
+### UC12 — Tìm & phân công tài xế
+
+| Mục            | Nội dung                                                                                                                                                                                                                                                                                                 |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC12                                                                                                                                                                                                                                                                                                     |
+| Tên            | Tìm & phân công tài xế (System) — *include* UC10                                                                                                                                                                                                                                                         |
+| Actor chính    | HỆ THỐNG (kích hoạt từ UC03)                                                                                                                                                                                                                                                                             |
+| Mô tả          | Khi có chuyến ở trạng thái *đang tìm tài xế*, hệ thống lọc tài xế phù hợp, xếp ưu tiên và lần lượt đề xuất tới tài xế cho đến khi có người nhận hoặc hết ứng viên.                                                                                                                                       |
+| Business rule  | • Chỉ xét tài xế *available*, đúng loại xe, trong bán kính 1 km (default) (RULE01/RULE04)• Ưu tiên gần nhất; hòa → đánh giá cao hơn (RULE05)• Mỗi lượt chờ 20 giây (RULE06); từ chối/timeout → tài xế kế (RULE07)• Dừng vòng khi đã thử 5 tài xế HOẶC quá 120 giây (default) → báo không tìm được (EX01) |
+| Tiền điều kiện | Chuyến ở trạng thái *đang tìm tài xế*.                                                                                                                                                                                                                                                                   |
+| Hậu điều kiện  | Chuyến được gán một tài xế; hoặc thông báo khách “không tìm được tài xế”.                                                                                                                                                                                                                                |
+
+**Luồng sự kiện chính**
+
+| Actor                                                   | Hệ thống                                                                                   |
+|---------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| 1\. (Kích hoạt từ UC03 khi có chuyến *đang tìm tài xế*) |                                                                                            |
+|                                                         | 2\. Xác định điểm đón của khách (FR12)                                                     |
+|                                                         | 3\. Lọc tài xế *available*, đúng loại xe, trong bán kính (FR13/FR14)                       |
+|                                                         | 4\. Xếp ưu tiên: gần nhất → đánh giá cao hơn (FR15)                                        |
+|                                                         | 5\. Chọn tài xế đầu danh sách (FR16), gửi đề xuất (FR17), chờ 20 giây (FR18) → chuyển UC10 |
+| 6\. Tài xế phản hồi (qua UC10)                          | 7\. Nếu chấp nhận → gán chuyến (FR23). Nếu từ chối/timeout → chọn tài xế kế tiếp (FR19)    |
+
+**Luồng ngoại lệ**
+
+| Actor                                      | Hệ thống                                                                                                  |
+|--------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| 6a. Tài xế từ chối / không phản hồi (EX02) | Loại tài xế, tự chuyển tài xế kế tiếp (RULE07)                                                            |
+|                                            | 7b. Hết ứng viên HOẶC quá 120 giây / 5 tài xế (EX01) → thông báo “không tìm được tài xế” (FR20). Kết thúc |
+
+### UC13 — Tính cước
+
+| Mục            | Nội dung                                                                                                                                   |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC13                                                                                                                                       |
+| Tên            | Tính cước (System) — *included by* UC11                                                                                                    |
+| Actor chính    | HỆ THỐNG (kích hoạt từ UC11)                                                                                                               |
+| Mô tả          | Khi chuyến hoàn thành, hệ thống tính cước theo loại dịch vụ và quãng đường, lưu chi tiết công thức phục vụ đối soát.                       |
+| Business rule  | • Cước = 12.000đ + 10.000đ/km (default) theo loại dịch vụ (RULE09)• Lưu chi tiết công thức áp dụng cho từng chuyến (phục vụ đối soát BG04) |
+| Tiền điều kiện | Chuyến ở trạng thái *hoàn thành*.                                                                                                          |
+| Hậu điều kiện  | Sinh một FARE cho chuyến; mở nhánh thanh toán (UC05).                                                                                      |
+
+**Luồng sự kiện chính**
+
+| Actor                                         | Hệ thống                                       |
+|-----------------------------------------------|------------------------------------------------|
+| 1\. (Kích hoạt từ UC11 khi chuyến hoàn thành) |                                                |
+|                                               | 2\. Lấy loại dịch vụ và quãng đường của chuyến |
+|                                               | 3\. Tính cước theo công thức (FR31)            |
+|                                               | 4\. Lưu FARE kèm chi tiết công thức            |
+|                                               | 5\. Mở nhánh thanh toán (UC05)                 |
+
+**Luồng ngoại lệ**
+
+| Actor | Hệ thống                                                                           |
+|-------|------------------------------------------------------------------------------------|
+|       | 2a. Thiếu dữ liệu quãng đường → dùng ước lượng hoặc đánh dấu *cần vận hành* (EX04) |
+
+### UC14 — Quản trị & vận hành
+
+| Mục            | Nội dung                                                                                                                                                                       |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Mã use case    | UC14                                                                                                                                                                           |
+| Tên            | Quản trị & vận hành (Operations Staff)                                                                                                                                         |
+| Actor chính    | OPERATIONS_STAFF                                                                                                                                                               |
+| Mô tả          | Nhân viên vận hành quản lý dữ liệu (khách/tài xế/xe/chuyến), theo dõi chuyến đang chạy, xử lý chuyến lỗi và tra cứu giao dịch; các thao tác nhạy cảm cần phân quyền.           |
+| Business rule  | • Thao tác nhạy cảm chỉ dành cho vai trò được cấp quyền (RULE12)• Mọi thao tác quan trọng đều ghi log (RULE14)• Chuyến lỗi được kiểm tra & xử lý qua giao diện quản trị (EX04) |
+| Tiền điều kiện | Đã đăng nhập với vai trò vận hành/được cấp quyền.                                                                                                                              |
+| Hậu điều kiện  | Dữ liệu được cập nhật / chuyến lỗi được xử lý; thao tác được ghi log.                                                                                                          |
+
+**Luồng sự kiện chính**
+
+| Actor                                                                                                                                     | Hệ thống                                    |
+|-------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| 1\. Đăng nhập & mở giao diện quản trị                                                                                                     |                                             |
+| 2\. Chọn chức năng: quản lý khách/tài xế/xe/chuyến (FR45), xem chuyến đang chạy (FR46), xử lý chuyến lỗi (FR47), tra cứu giao dịch (FR48) |                                             |
+|                                                                                                                                           | 3\. Kiểm tra phân quyền cho thao tác (FR49) |
+|                                                                                                                                           | 4\. Thực hiện thao tác và ghi log (FR51)    |
+|                                                                                                                                           | 5\. Hiển thị kết quả                        |
+
+**Luồng ngoại lệ**
+
+| Actor                                                      | Hệ thống                                             |
+|------------------------------------------------------------|------------------------------------------------------|
+| 2a. Nhân viên thường cố thực hiện thao tác nhạy cảm (EX07) | 3a. Kiểm tra phân quyền, từ chối và ghi log (RULE12) |
+| 2b. Phát hiện chuyến kẹt trạng thái / sai dữ liệu (EX04)   | Kiểm tra và hỗ trợ xử lý qua giao diện quản trị      |
 
 ## Bước 13: Tiêu chí chấp nhận (Acceptance Criteria – AC)
 
@@ -734,10 +1016,10 @@ Ba `include` cốt lõi: UC03 include UC12 (đặt xe kéo theo tìm tài xế),
 | **AC31** | NFR09     | Given giao dịch điện tử, When xử lý, Then không lưu thông tin thẻ/tài khoản nhạy cảm trong CAB (RULE10).                                                                                 |
 | **AC32** | NFR12     | Given tham số chưa chốt (bán kính, timeout, công thức cước, retry), When triển khai, Then giá trị nằm ở cấu hình, không hard-code.                                                       |
 | **AC33** | UC14/BR14 | Given chuyến đi qua các mốc, When mỗi mốc xảy ra, Then hệ thống phát thông báo khách đúng thời điểm (MVP: ghi log).                                                                      |
-| **AC34** | BR15      | Given có chuyến mới/thay đổi, When xảy ra, Then hệ thống phát thông báo tài xế đúng thời điểm (MVP: ghi log).                                                                            |
-| **AC35** | BR10      | Given tài xế cập nhật vị trí, When ghi nhận, Then vị trí dùng được cho ghép tài xế ở UC12.                                                                                               |
+| **AC34** | UC14      | Given có chuyến mới/thay đổi, When xảy ra, Then hệ thống phát thông báo tài xế đúng thời điểm (MVP: ghi log).                                                                            |
+| **AC35** | UC12      | Given tài xế cập nhật vị trí, When ghi nhận, Then vị trí dùng được cho ghép tài xế ở UC12.                                                                                               |
 | **AC36** | UC14      | Given nhân viên vận hành đăng nhập, When mở màn hình vận hành, Then thấy danh sách chuyến đang chạy + trạng thái tài xế.                                                                 |
-| **AC37** | BR20      | Given một thao tác nhạy cảm được thực hiện, When hoàn tất, Then sinh một bản ghi audit (RULE14).                                                                                         |
+| **AC37** | UC14      | Given một thao tác nhạy cảm được thực hiện, When hoàn tất, Then sinh một bản ghi audit (RULE14).                                                                                         |
 | **AC38** | —         | Given chuyến *đang tìm tài xế*, When khách hủy, Then hủy **miễn phí (default)** và thông báo; Given *đã có tài xế chưa đón khách*, When hủy, Then áp phí **10.000đ (default)** (RULE17). |
 | **AC39** | —         | Given chuyến *đã đón khách*, When khách cố hủy, Then **bị chặn (default)** (RULE17, EX10).                                                                                               |
 | **AC40** | NFR/EX09  | Given mất kết nối ≤ **60 giây (default)**, When online lại, Then trạng thái chuyến giữ nguyên & được đồng bộ (RULE18); quá hạn khi đang chạy → đánh dấu *cần vận hành*.                  |
@@ -795,9 +1077,9 @@ Mỗi AC là một điều kiện kiểm chứng được — QA chuyển thẳn
 | BG08       | BR21 (chung)           | FR54                   | — (NFR/EX09) | AC40 |
 | BG10       | BR20 (chung)           | FR51, FR30             | — (NFR13)    | AC41 |
 
-## Bước 15 (bổ sung): Open Items – Câu hỏi cần làm rõ với khách hàng
+## Phụ lục A – Câu hỏi cần xác nhận với khách hàng (Open Items)
 
-| #  | Điểm chưa chốt (theo file gốc)        | Trạng thái                                                                                    | Câu hỏi cho khách hàng                                                   |
+| \#  | Điểm chưa chốt                        | Trạng thái                                                                                    | Câu hỏi cho khách hàng                                                   |
 |-----|---------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
 | 1   | Cách tính cước                        | Có default (12k + 10k/km)                                                                     | Biểu giá chính thức? Có phụ phí giờ cao điểm/quãng đường tối thiểu?      |
 | 2   | Tiêu chí ưu tiên tài xế               | Có default (gần nhất → đánh giá cao)                                                          | Có thêm tiêu chí (tỷ lệ nhận chuyến, thời gian chờ của tài xế)?          |
