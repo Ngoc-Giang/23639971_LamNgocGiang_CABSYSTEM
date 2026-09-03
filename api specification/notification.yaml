@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: CAB - Notification Service
+  description: >
+    LƯU Ý: Service này KHÔNG có REST endpoint công khai. Nó chỉ lắng nghe
+    event từ Trip Service, Matching Service và Payment Service rồi gửi
+    thông báo (MVP: ghi log / in ra, chưa gửi SMS/Push thật — xem Bước 4C).
+    File này chỉ dùng để tài liệu hoá "hợp đồng" event, không phải spec
+    OpenAPI đầy đủ. Nếu cần chuẩn async thật, nên chuyển sang AsyncAPI.
+    Sinh từ FR37-FR43 và AC33, AC34 trong SRS.
+  version: "0.1.0-mvp"
+
+servers:
+  - url: https://api.cab.example.com/notification-service
+    description: Mock/dev server
+
+paths:
+  /health:
+    get:
+      summary: Health check (endpoint duy nhất công khai của service này)
+      responses:
+        "200":
+          description: Service đang chạy bình thường
+
+x-events-consumed:
+  - name: trip.created
+    from: Trip Service
+    x-fr: [FR37]
+    x-ac: [AC33]
+    description: Thông báo khách "đã tiếp nhận yêu cầu".
+
+  - name: matching.driver_offered
+    from: Matching Service
+    x-fr: [FR38, FR42]
+    x-ac: [AC33, AC34]
+    description: Thông báo khách "có tài xế nhận" + thông báo tài xế "chuyến mới".
+
+  - name: trip.status_changed
+    from: Trip Service
+    x-fr: [FR39, FR40, FR43]
+    x-ac: [AC33, AC34]
+    description: >
+      Thông báo khách khi tài xế đến điểm đón / hoàn thành chuyến (FR39, FR40).
+      Thông báo tài xế khi có thay đổi ở chuyến đang chạy (FR43).
+
+  - name: payment.completed
+    from: Payment Service
+    x-fr: [FR41]
+    x-ac: [AC33]
+    description: Thông báo khách kết quả thanh toán.
+
+  - name: payment.fallback_cash
+    from: Payment Service
+    x-fr: [FR41]
+    x-ac: [AC33]
+    description: Thông báo khách việc điện tử thất bại, đã chuyển tiền mặt.
+
+  - name: matching.failed
+    from: Matching Service
+    x-fr: [FR20]
+    x-ac: [AC26]
+    description: Thông báo khách "không tìm được tài xế".
+
+x-mvp-note: >
+  Theo Bước 4C (Build vs Mock): MVP chỉ ghi log/in ra tại đúng thời điểm,
+  không tích hợp SMS/Push thật. Nghiệm thu bằng AC33/AC34 (đúng thời điểm
+  & nội dung thông báo), không nghiệm thu việc gửi thật tới thiết bị.
