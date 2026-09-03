@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: CAB - Admin/Ops Service
+  description: >
+    Giao diện quản trị & vận hành cho Operations Staff. Sinh từ FR45-FR49,
+    FR51 và AC tương ứng trong SRS (UC14 Quản trị & vận hành). Mọi endpoint
+    dưới `/admin/*` đều đi qua middleware phân quyền (FR49, RULE12).
+  version: "0.1.0-mvp"
+
+servers:
+  - url: https://api.cab.example.com/admin-service
+    description: Mock/dev server
+
+tags:
+  - name: Admin
+
+security:
+  - bearerAuth: []
+  - operationsRole: []
+
+paths:
+  /admin/customers:
+    get:
+      tags: [Admin]
+      summary: Danh sách khách hàng (CRUD quản trị)
+      x-fr: [FR45]
+      x-ac: []
+      responses:
+        "200":
+          description: Danh sách khách hàng
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CustomerRef" }
+        "403":
+          description: Không đủ quyền (AC30, RULE12)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/drivers:
+    get:
+      tags: [Admin]
+      summary: Danh sách tài xế (CRUD quản trị)
+      x-fr: [FR45]
+      x-ac: []
+      responses:
+        "200":
+          description: Danh sách tài xế
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DriverRef" }
+
+  /admin/trips:
+    get:
+      tags: [Admin]
+      summary: Xem chuyến đang diễn ra + trạng thái tài xế
+      x-fr: [FR46]
+      x-ac: [AC36]
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, example: active }
+      responses:
+        "200":
+          description: Danh sách chuyến đang chạy (AC36)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TripRef" }
+
+  /admin/trips/{tripId}/resolve:
+    post:
+      tags: [Admin]
+      summary: Hỗ trợ xử lý chuyến bị lỗi
+      x-fr: [FR47]
+      x-ac: []
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Chuyến lỗi đã được xử lý
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TripRef" }
+
+  /admin/transactions:
+    get:
+      tags: [Admin]
+      summary: Tra cứu lịch sử giao dịch
+      x-fr: [FR48]
+      x-ac: []
+      responses:
+        "200":
+          description: Danh sách giao dịch thanh toán
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PaymentRef" }
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Xem log thao tác quan trọng (audit)
+      x-fr: [FR51]
+      x-ac: [AC37]
+      responses:
+        "200":
+          description: Mỗi thao tác nhạy cảm sinh một bản ghi audit (AC37, RULE14)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditLog" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    operationsRole:
+      type: apiKey
+      in: header
+      name: X-Role
+      description: "FR49 — Kiểm tra phân quyền cho thao tác nhạy cảm (RULE12)"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+    # Bản tham chiếu rút gọn — dữ liệu gốc thuộc service khác
+    CustomerRef:
+      type: object
+      description: Dữ liệu gốc thuộc User/Auth Service
+      properties:
+        id: { type: string }
+        ho_ten: { type: string }
+        sdt: { type: string }
+
+    DriverRef:
+      type: object
+      description: Dữ liệu gốc thuộc User/Auth Service
+      properties:
+        id: { type: string }
+        ho_ten: { type: string }
+        trang_thai: { type: string }
+
+    TripRef:
+      type: object
+      description: Dữ liệu gốc thuộc Trip Service
+      properties:
+        id: { type: string }
+        trang_thai: { type: string }
+        driver_id: { type: string, nullable: true }
+
+    PaymentRef:
+      type: object
+      description: Dữ liệu gốc thuộc Payment Service
+      properties:
+        id: { type: string }
+        trip_id: { type: string }
+        trang_thai: { type: string }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: string }
+        loai_doi_tuong: { type: string }
+        doi_tuong_id: { type: string }
+        hanh_dong: { type: string }
+        thoi_diem: { type: string, format: date-time }
