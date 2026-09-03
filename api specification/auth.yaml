@@ -1,436 +1,320 @@
 openapi: 3.0.3
-
 info:
-  title: CAB - Auth API
-  version: "0.1.0"
-  description: API xác thực và đăng ký tài khoản cho hệ thống CAB.
+  title: CAB - User/Auth Service
+  description: >
+    Quản lý tài khoản, xác thực, hồ sơ Customer & Driver.
+    Sinh từ FR01-FR08, FR30 và AC tương ứng trong SRS (Bước 7 / Bước 13).
+  version: "0.1.0-mvp"
 
 servers:
-  - url: https://api.cab.example.com/v1
-    description: Mock/Dev Server
+  - url: https://api.cab.example.com/auth-service
+    description: Mock/dev server
 
 tags:
   - name: Auth
-    description: Đăng ký và đăng nhập tài khoản
+  - name: Customer
+  - name: Driver
+
+security:
+  - bearerAuth: []
 
 paths:
-
-  # ============================================================
-  # 1. ĐĂNG KÝ KHÁCH HÀNG
-  # ============================================================
   /auth/register/customer:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: Đăng ký tài khoản khách hàng
-      description: Cho phép khách hàng tạo tài khoản mới.
-      x-fr:
-        - FR01
-      x-ac:
-        - AC01
-        - AC02
+      x-fr: [FR01]
+      x-ac: [AC01, AC02]
       security: []
-
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CustomerRegisterRequest"
-            example:
-              ho_ten: "Nguyen Van A"
-              sdt: "0901234567"
-              email: "nguyenvana@gmail.com"
-              mat_khau: "123456"
-
+              type: object
+              required: [ho_ten, sdt, mat_khau]
+              properties:
+                ho_ten: { type: string }
+                sdt: { type: string }
+                email: { type: string, format: email }
+                mat_khau: { type: string, format: password }
       responses:
-
         "201":
-          description: Đăng ký tài khoản thành công
+          description: Tạo tài khoản thành công (AC01)
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerRegisterResponse"
-              example:
-                message: "Đăng ký tài khoản thành công"
-                data:
-                  id: "CUS001"
-                  ho_ten: "Nguyen Van A"
-                  sdt: "0901234567"
-                  email: "nguyenvana@gmail.com"
-
-        "400":
-          description: Dữ liệu đăng ký không hợp lệ
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "INVALID_DATA"
-                message: "Thông tin đăng ký không hợp lệ"
-
+              schema: { $ref: "#/components/schemas/Customer" }
         "409":
-          description: Số điện thoại hoặc email đã tồn tại
+          description: Định danh (SĐT/email) đã tồn tại (AC02)
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "CUSTOMER_EXISTS"
-                message: "Số điện thoại hoặc email đã tồn tại"
+              schema: { $ref: "#/components/schemas/Error" }
 
-
-  # ============================================================
-  # 2. ĐĂNG KÝ TÀI XẾ
-  # ============================================================
   /auth/register/driver:
     post:
-      tags:
-        - Auth
-      summary: Đăng ký tài khoản tài xế
-      description: Cho phép tạo tài khoản tài xế.
-      x-fr:
-        - FR05
-      x-ac:
-        - AC14
-      security: []
-
+      tags: [Auth]
+      summary: Tạo tài khoản tài xế (tự đăng ký hoặc do NV vận hành tạo)
+      x-fr: [FR05]
+      x-ac: [AC14]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DriverRegisterRequest"
-            example:
-              ho_ten: "Tran Van B"
-              sdt: "0912345678"
-              mat_khau: "123456"
-              tao_boi: "self"
-
+              type: object
+              required: [ho_ten, sdt, mat_khau]
+              properties:
+                ho_ten: { type: string }
+                sdt: { type: string }
+                mat_khau: { type: string, format: password }
+                tao_boi: { type: string, enum: [self, operations_staff], default: self }
       responses:
-
         "201":
           description: Tạo tài khoản tài xế thành công
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/DriverRegisterResponse"
-              example:
-                message: "Tạo tài khoản tài xế thành công"
-                data:
-                  id: "DRV001"
-                  ho_ten: "Tran Van B"
-                  sdt: "0912345678"
-                  trang_thai: "unavailable"
-                  diem_danh_gia: 0
-
-        "400":
-          description: Dữ liệu đăng ký không hợp lệ
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "INVALID_DATA"
-                message: "Thông tin đăng ký không hợp lệ"
-
+              schema: { $ref: "#/components/schemas/Driver" }
         "409":
-          description: Số điện thoại đã tồn tại
+          description: Định danh đã tồn tại
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "DRIVER_EXISTS"
-                message: "Số điện thoại đã tồn tại"
+              schema: { $ref: "#/components/schemas/Error" }
 
-
-  # ============================================================
-  # 3. ĐĂNG NHẬP
-  # ============================================================
   /auth/login:
     post:
-      tags:
-        - Auth
-      summary: Đăng nhập
-      description: Đăng nhập bằng số điện thoại hoặc email và mật khẩu.
-      x-fr:
-        - FR02
-      x-ac:
-        - AC01
-        - AC03
-        - AC14
+      tags: [Auth]
+      summary: Đăng nhập, cấp phiên (dùng chung Customer & Driver)
+      x-fr: [FR02]
+      x-ac: [AC01, AC03, AC14]
       security: []
-
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
-            example:
-              dinh_danh: "0901234567"
-              mat_khau: "123456"
-
+              type: object
+              required: [dinh_danh, mat_khau]
+              properties:
+                dinh_danh: { type: string, description: "SĐT hoặc email" }
+                mat_khau: { type: string, format: password }
       responses:
-
         "200":
-          description: Đăng nhập thành công
+          description: Đăng nhập thành công, trả về token (AC01, AC14)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-              example:
-                message: "Đăng nhập thành công"
-                data:
-                  access_token: "eyJhbGciOiJIUzI1NiIs..."
-                  role: "customer"
-
-        "400":
-          description: Thiếu thông tin đăng nhập
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "MISSING_DATA"
-                message: "Vui lòng nhập thông tin đăng nhập"
-
+                type: object
+                properties:
+                  access_token: { type: string }
+                  role: { type: string, enum: [customer, driver] }
         "401":
-          description: Sai thông tin đăng nhập
+          description: Sai mật khẩu (AC03) — khóa tạm thời sau N lần sai (default)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /customers/me:
+    get:
+      tags: [Customer]
+      summary: Xem hồ sơ cá nhân
+      x-fr: []
+      x-ac: []
+      responses:
+        "200":
+          description: Thông tin hồ sơ khách hàng
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+    put:
+      tags: [Customer]
+      summary: Cập nhật hồ sơ cá nhân (họ tên, SĐT, email)
+      x-fr: [FR03]
+      x-ac: []
+      description: >
+        LƯU Ý: UC02 hiện chưa có Acceptance Criteria (AC) tương ứng trong SRS —
+        cần bổ sung trước khi viết test case cho endpoint này.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ho_ten: { type: string }
+                sdt: { type: string }
+                email: { type: string, format: email }
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+        "400":
+          description: Trường bắt buộc thiếu hoặc không hợp lệ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /customers/me/trips:
+    get:
+      tags: [Customer]
+      summary: Xem lịch sử chuyến đi + số tiền
+      x-fr: [FR04]
+      x-ac: [AC13]
+      description: >
+        Đọc dữ liệu tổng hợp từ Trip Service (qua API Gateway hoặc BFF).
+        Đặt ở đây vì gắn với hồ sơ khách hàng, không sở hữu dữ liệu Trip gốc.
+      responses:
+        "200":
+          description: Danh sách chuyến của chính khách hàng (AC13)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-              example:
-                code: "INVALID_CREDENTIALS"
-                message: "Số điện thoại/email hoặc mật khẩu không đúng"
+                type: array
+                items: { $ref: "#/components/schemas/TripSummary" }
 
+  /drivers/me:
+    get:
+      tags: [Driver]
+      summary: Xem hồ sơ & phương tiện tài xế
+      x-fr: []
+      x-ac: [AC15]
+      responses:
+        "200":
+          description: Thông tin hồ sơ + phương tiện
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Driver" }
+    put:
+      tags: [Driver]
+      summary: Cập nhật hồ sơ tài xế
+      x-fr: [FR06]
+      x-ac: [AC15]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ho_ten: { type: string }
+      responses:
+        "200":
+          description: Cập nhật thành công (AC15)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Driver" }
 
-# ================================================================
-# COMPONENTS
-# ================================================================
+  /drivers/me/vehicle:
+    put:
+      tags: [Driver]
+      summary: Cập nhật thông tin phương tiện
+      x-fr: [FR07]
+      x-ac: [AC15]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Vehicle" }
+      responses:
+        "200":
+          description: Lưu & dùng cho lọc ở Matching Service (AC15)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Vehicle" }
+
+  /drivers/me/status:
+    patch:
+      tags: [Driver]
+      summary: Đổi trạng thái sẵn sàng / không sẵn sàng
+      x-fr: [FR08]
+      x-ac: [AC16, AC17]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trang_thai]
+              properties:
+                trang_thai: { type: string, enum: [available, unavailable] }
+      responses:
+        "200":
+          description: Cập nhật & đủ điều kiện được ghép (AC16, RULE01)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Driver" }
+        "409":
+          description: Ngoài ca làm việc hoặc đang có chuyến — từ chối (AC17, RULE02/RULE03)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /drivers/me/location:
+    patch:
+      tags: [Driver]
+      summary: Ghi nhận & cập nhật vị trí tài xế (nạp dữ liệu cho Matching Service)
+      x-fr: [FR30]
+      x-ac: [AC35]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lat, lng]
+              properties:
+                lat: { type: number, format: float }
+                lng: { type: number, format: float }
+      responses:
+        "204":
+          description: Vị trí đã ghi nhận, phát event cho Matching Service dùng (AC35)
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "FR50 — Xác thực trước chức năng cần tài khoản (RULE13, AC30)"
 
   schemas:
-
-    # ------------------------------------------------------------
-    # REQUEST - Đăng ký Customer
-    # ------------------------------------------------------------
-    CustomerRegisterRequest:
-      type: object
-      required:
-        - ho_ten
-        - sdt
-        - mat_khau
-      properties:
-        ho_ten:
-          type: string
-          description: Họ và tên khách hàng
-          example: "Nguyen Van A"
-
-        sdt:
-          type: string
-          description: Số điện thoại
-          example: "0901234567"
-
-        email:
-          type: string
-          format: email
-          description: Email khách hàng
-          example: "nguyenvana@gmail.com"
-
-        mat_khau:
-          type: string
-          format: password
-          description: Mật khẩu đăng nhập
-          example: "123456"
-
-
-    # ------------------------------------------------------------
-    # RESPONSE - Đăng ký Customer
-    # ------------------------------------------------------------
-    CustomerRegisterResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Đăng ký tài khoản thành công"
-
-        data:
-          $ref: "#/components/schemas/Customer"
-
-
-    # ------------------------------------------------------------
-    # REQUEST - Đăng ký Driver
-    # ------------------------------------------------------------
-    DriverRegisterRequest:
-      type: object
-      required:
-        - ho_ten
-        - sdt
-        - mat_khau
-      properties:
-        ho_ten:
-          type: string
-          description: Họ và tên tài xế
-          example: "Tran Van B"
-
-        sdt:
-          type: string
-          description: Số điện thoại tài xế
-          example: "0912345678"
-
-        mat_khau:
-          type: string
-          format: password
-          description: Mật khẩu đăng nhập
-          example: "123456"
-
-        tao_boi:
-          type: string
-          description: Người tạo tài khoản
-          enum:
-            - self
-            - operations_staff
-          default: self
-          example: self
-
-
-    # ------------------------------------------------------------
-    # RESPONSE - Đăng ký Driver
-    # ------------------------------------------------------------
-    DriverRegisterResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Tạo tài khoản tài xế thành công"
-
-        data:
-          $ref: "#/components/schemas/Driver"
-
-
-    # ------------------------------------------------------------
-    # REQUEST - Login
-    # ------------------------------------------------------------
-    LoginRequest:
-      type: object
-      required:
-        - dinh_danh
-        - mat_khau
-      properties:
-        dinh_danh:
-          type: string
-          description: Số điện thoại hoặc email
-          example: "0901234567"
-
-        mat_khau:
-          type: string
-          format: password
-          description: Mật khẩu
-          example: "123456"
-
-
-    # ------------------------------------------------------------
-    # RESPONSE - Login
-    # ------------------------------------------------------------
-    LoginResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: "Đăng nhập thành công"
-
-        data:
-          type: object
-          properties:
-            access_token:
-              type: string
-              description: JWT access token
-              example: "eyJhbGciOiJIUzI1NiIs..."
-
-            role:
-              type: string
-              enum:
-                - customer
-                - driver
-              example: customer
-
-
-    # ------------------------------------------------------------
-    # CUSTOMER
-    # ------------------------------------------------------------
-    Customer:
-      type: object
-      properties:
-        id:
-          type: string
-          description: ID khách hàng
-          example: "CUS001"
-
-        ho_ten:
-          type: string
-          description: Họ và tên
-          example: "Nguyen Van A"
-
-        sdt:
-          type: string
-          description: Số điện thoại
-          example: "0901234567"
-
-        email:
-          type: string
-          format: email
-          description: Email
-          example: "nguyenvana@gmail.com"
-
-
-    # ------------------------------------------------------------
-    # DRIVER
-    # ------------------------------------------------------------
-    Driver:
-      type: object
-      properties:
-        id:
-          type: string
-          description: ID tài xế
-          example: "DRV001"
-
-        ho_ten:
-          type: string
-          description: Họ và tên
-          example: "Tran Van B"
-
-        sdt:
-          type: string
-          description: Số điện thoại
-          example: "0912345678"
-
-        trang_thai:
-          type: string
-          enum:
-            - available
-            - unavailable
-            - on_trip
-          example: unavailable
-
-        diem_danh_gia:
-          type: number
-          format: float
-          example: 0
-
-
-    # ------------------------------------------------------------
-    # ERROR
-    # ------------------------------------------------------------
     Error:
       type: object
       properties:
-        code:
-          type: string
-          example: "INVALID_DATA"
+        code: { type: string }
+        message: { type: string }
 
-        message:
-          type: string
-          example: "Thông tin không hợp lệ"
+    Customer:
+      type: object
+      properties:
+        id: { type: string }
+        ho_ten: { type: string }
+        sdt: { type: string }
+        email: { type: string, format: email }
+
+    Driver:
+      type: object
+      properties:
+        id: { type: string }
+        ho_ten: { type: string }
+        trang_thai: { type: string, enum: [available, unavailable, on_trip] }
+        diem_danh_gia: { type: number, format: float }
+
+    Vehicle:
+      type: object
+      properties:
+        id: { type: string }
+        driver_id: { type: string }
+        loai_xe: { type: string }
+        bien_so: { type: string }
+
+    TripSummary:
+      type: object
+      description: Bản rút gọn của Trip (dữ liệu gốc thuộc Trip Service)
+      properties:
+        id: { type: string }
+        diem_don: { type: string }
+        diem_den: { type: string }
+        trang_thai: { type: string }
+        tong_tien: { type: number, nullable: true }
