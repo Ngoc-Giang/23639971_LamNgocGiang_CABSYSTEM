@@ -1,0 +1,123 @@
+openapi: 3.0.3
+info:
+  title: CAB - Matching Service
+  description: >
+    Tìm & phân công tài xế. Phần lớn được kích hoạt nội bộ (event từ Trip
+    Service), chỉ có 1 endpoint công khai cho tài xế phản hồi đề xuất.
+    Sinh từ FR12-FR23 và AC tương ứng trong SRS (UC12).
+  version: "0.1.0-mvp"
+
+servers:
+  - url: https://api.cab.example.com/matching-service
+    description: Mock/dev server
+
+tags:
+  - name: Matching
+
+security:
+  - bearerAuth: []
+
+paths:
+  /matching/requests:
+    post:
+      tags: [Matching]
+      summary: >
+        [internal] Kích hoạt khi nhận event trip.created từ Trip Service.
+        Xác định vị trí khách, lọc tài xế theo bán kính + loại xe, xếp ưu tiên.
+      x-fr: [FR12, FR13, FR14, FR15, FR16]
+      x-ac: [AC23, AC24]
+      security:
+        - internalServiceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trip_id]
+              properties:
+                trip_id: { type: string }
+      responses:
+        "202":
+          description: >
+            Vòng tìm tài xế đã bắt đầu (AC23) — chỉ xét tài xế available,
+            trong bán kính 1 km (default), đúng loại xe (RULE01/RULE04).
+            Ưu tiên gần nhất; hòa → đánh giá cao hơn (AC24, RULE05, default).
+
+  /trip-offers/{offerId}/respond:
+    post:
+      tags: [Matching]
+      summary: Tài xế chấp nhận / từ chối đề xuất chuyến
+      x-fr: [FR17, FR18, FR19, FR21, FR22, FR23]
+      x-ac: [AC18, AC19, AC20, AC25, AC26]
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phan_hoi]
+              properties:
+                phan_hoi: { type: string, enum: [accept, reject] }
+      responses:
+        "200":
+          description: >
+            Chấp nhận — chuyến được gán, phát event matching.driver_offered
+            để Trip Service cập nhật + Notification Service báo khách (AC18).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TripOffer" }
+        "409":
+          description: Tài xế đang thực hiện chuyến khác — không gán trùng (AC20, RULE03)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "410":
+          description: >
+            Từ chối hoặc hết 20 giây (default) không phản hồi — coi như từ
+            chối, tự chuyển tài xế kế tiếp không bắt khách tạo lại
+            (AC19, AC25, RULE06/07, EX02). Hết ứng viên hoặc quá 120s/5 tài
+            xế (default) → phát event matching.failed, EX01 (AC26).
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalServiceAuth:
+      type: apiKey
+      in: header
+      name: X-Internal-Service-Key
+      description: Dùng khi Trip Service gọi trực tiếp (thay vì qua event bus)
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+    TripOffer:
+      type: object
+      properties:
+        id: { type: string }
+        trip_id: { type: string }
+        driver_id: { type: string }
+        trang_thai: { type: string, enum: [pending, accepted, rejected, timeout] }
+        thoi_diem: { type: string, format: date-time }
+
+x-events-consumed:
+  - name: trip.created
+    description: Trip Service phát khi có chuyến mới ở trạng thái "đang tìm tài xế" — kích hoạt vòng ghép.
+
+x-events-published:
+  - name: matching.driver_offered
+    description: Phát khi một tài xế chấp nhận đề xuất — Trip Service & Notification Service lắng nghe.
+  - name: matching.failed
+    description: Phát khi hết ứng viên hoặc quá 120s/5 tài xế (default) mà không ai nhận — Trip Service cập nhật trạng thái, Notification báo khách "không tìm được tài xế".
