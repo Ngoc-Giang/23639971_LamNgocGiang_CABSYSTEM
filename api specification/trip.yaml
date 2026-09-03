@@ -1,0 +1,225 @@
+openapi: 3.0.3
+info:
+  title: CAB - Trip Service
+  description: >
+    Sở hữu vòng đời chuyến đi (tạo, theo dõi, cập nhật tiến trình, hủy) và
+    đánh giá sau chuyến. Sinh từ FR09-FR11, FR24-FR29, FR44, FR52-FR53 và
+    AC tương ứng trong SRS.
+  version: "0.1.0-mvp"
+
+servers:
+  - url: https://api.cab.example.com/trip-service
+    description: Mock/dev server
+
+tags:
+  - name: Trip
+  - name: Rating
+
+security:
+  - bearerAuth: []
+
+paths:
+  /trips:
+    post:
+      tags: [Trip]
+      summary: Tạo chuyến — nhập điểm đón/đến, chọn loại xe, gửi yêu cầu
+      x-fr: [FR09, FR10, FR11]
+      x-ac: [AC04, AC05, AC06]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [diem_don, diem_den, service_type_id]
+              properties:
+                diem_don: { type: string }
+                diem_den: { type: string }
+                service_type_id: { type: string }
+      responses:
+        "201":
+          description: >
+            Tạo chuyến ở trạng thái "đang tìm tài xế" (AC04) — phát event
+            `trip.created` để Matching Service bắt đầu ghép tài xế.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
+        "400":
+          description: Thiếu điểm đón/đến (AC05)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401":
+          description: Chưa đăng nhập (AC06, RULE13)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}:
+    get:
+      tags: [Trip]
+      summary: Truy vấn trạng thái chuyến + ETA
+      x-fr: [FR24, FR25]
+      x-ac: [AC07, AC08]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Trạng thái hiện tại của chuyến (AC07)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
+        "403":
+          description: Không phải chủ chuyến (AC08, RULE16)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}/status:
+    patch:
+      tags: [Trip]
+      summary: Tài xế cập nhật tiến trình chuyến
+      x-fr: [FR26, FR27, FR28, FR29]
+      x-ac: [AC21, AC22]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trang_thai]
+              properties:
+                trang_thai:
+                  type: string
+                  enum: [da_den_diem_don, da_don_khach, dang_di_chuyen, hoan_thanh]
+      responses:
+        "200":
+          description: >
+            Trạng thái được ghi nhận đúng thứ tự (AC21). Khi chuyển sang
+            `hoan_thanh`, phát event `trip.completed` để Payment Service tính cước.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
+        "409":
+          description: Cập nhật sai thứ tự vòng đời chuyến (AC22, RULE08, EX08)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}/cancel:
+    post:
+      tags: [Trip]
+      summary: Hủy chuyến (kiểm tra mốc cho phép + áp phí theo chính sách)
+      x-fr: [FR52, FR53]
+      x-ac: [AC38, AC39]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: >
+            Hủy thành công — miễn phí khi đang tìm tài xế, hoặc áp phí 10.000đ
+            (default) khi đã có tài xế chưa đón khách (AC38).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
+        "409":
+          description: Chuyến đã đón khách — bị chặn hủy (AC39, RULE17, EX10)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}/rating:
+    post:
+      tags: [Rating]
+      summary: Khách đánh giá tài xế sau chuyến
+      x-fr: [FR44]
+      x-ac: [AC11, AC12]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [so_sao]
+              properties:
+                so_sao: { type: integer, minimum: 1, maximum: 5 }
+                nhan_xet: { type: string }
+      responses:
+        "201":
+          description: Lưu đánh giá gắn với chuyến/tài xế (AC11)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Rating" }
+        "409":
+          description: Chuyến chưa hoàn thành — từ chối đánh giá (AC12, RULE11)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema: { type: string }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+    Trip:
+      type: object
+      properties:
+        id: { type: string }
+        customer_id: { type: string }
+        driver_id: { type: string, nullable: true }
+        service_type_id: { type: string }
+        diem_don: { type: string }
+        diem_den: { type: string }
+        trang_thai:
+          type: string
+          enum:
+            - dang_tim_tai_xe
+            - da_nhan
+            - da_den_diem_don
+            - da_don_khach
+            - dang_di_chuyen
+            - hoan_thanh
+            - da_huy
+        eta_phut: { type: integer, nullable: true }
+
+    Rating:
+      type: object
+      properties:
+        id: { type: string }
+        trip_id: { type: string }
+        so_sao: { type: integer }
+        nhan_xet: { type: string }
+
+x-events-published:
+  - name: trip.created
+    description: Phát khi tạo chuyến thành công — Matching Service lắng nghe để bắt đầu ghép tài xế.
+  - name: trip.driver_assigned
+    description: Phát khi tài xế được gán — Notification Service lắng nghe để báo khách (FR38).
+  - name: trip.completed
+    description: Phát khi chuyến hoàn thành — Payment Service lắng nghe để tính cước (FR31).
+  - name: trip.status_changed
+    description: Phát mỗi mốc cập nhật — Notification Service lắng nghe để báo khách (FR37-FR40).
+
+x-events-consumed:
+  - name: matching.driver_offered
+    description: Matching Service phát khi có tài xế được gán — cập nhật driver_id & trạng thái "đã nhận".
