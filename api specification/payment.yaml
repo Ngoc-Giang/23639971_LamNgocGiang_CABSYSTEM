@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: CAB - Payment / Fare Service
+  description: >
+    Tính cước & xử lý thanh toán. Sinh từ FR31-FR36 và AC tương ứng trong SRS
+    (UC13 Tính cước, UC05 Thanh toán chuyến).
+  version: "0.1.0-mvp"
+
+servers:
+  - url: https://api.cab.example.com/payment-service
+    description: Mock/dev server
+
+tags:
+  - name: Fare
+  - name: Payment
+
+security:
+  - bearerAuth: []
+
+paths:
+  /trips/{tripId}/fare:
+    get:
+      tags: [Fare]
+      summary: Đọc kết quả tính cước (tự sinh khi nhận event trip.completed)
+      x-fr: [FR31]
+      x-ac: [AC27, AC28]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: "Cước = 12.000đ + 10.000đ/km (default) theo loại dịch vụ (AC27, RULE09)"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Fare" }
+        "409":
+          description: Chuyến chưa hoàn thành — chưa có cước (AC28)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}/payment:
+    post:
+      tags: [Payment]
+      summary: Chọn phương thức & thực hiện thanh toán
+      x-fr: [FR32, FR33, FR34]
+      x-ac: [AC09, AC10]
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phuong_thuc]
+              properties:
+                phuong_thuc: { type: string, enum: [cash, e_wallet] }
+      responses:
+        "200":
+          description: Tiền mặt — xác nhận đã thanh toán ngay (AC09)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Payment" }
+        "202":
+          description: >
+            Điện tử — đang gọi cổng thanh toán ngoài (mock provider), chờ
+            callback. Không lưu thông tin thẻ/tài khoản nhạy cảm (RULE10, AC31).
+
+  /payments/{paymentId}/callback:
+    post:
+      tags: [Payment]
+      summary: "[internal] Cổng thanh toán ngoài gọi về kết quả giao dịch"
+      x-fr: [FR35, FR36]
+      x-ac: [AC10]
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ket_qua]
+              properties:
+                ket_qua: { type: string, enum: [success, failed] }
+      responses:
+        "200":
+          description: >
+            Thành công → cập nhật trạng thái đã thanh toán, phát event
+            payment.completed. Thất bại → thử lại tối đa 2 lần (default),
+            hết lần thì tự chuyển tiền mặt + phát event payment.fallback_cash
+            để Notification Service báo khách (AC10).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Payment" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalServiceAuth:
+      type: apiKey
+      in: header
+      name: X-Internal-Service-Key
+      description: Dùng cho cổng thanh toán ngoài gọi callback
+
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema: { type: string }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+
+    Fare:
+      type: object
+      properties:
+        id: { type: string }
+        trip_id: { type: string }
+        tong_tien: { type: number }
+        chi_tiet_tinh: { type: string }
+
+    Payment:
+      type: object
+      properties:
+        id: { type: string }
+        trip_id: { type: string }
+        phuong_thuc: { type: string, enum: [cash, e_wallet] }
+        trang_thai: { type: string, enum: [pending, success, failed] }
+        so_lan_thu: { type: integer }
+
+x-events-consumed:
+  - name: trip.completed
+    description: Trip Service phát khi chuyến hoàn thành — kích hoạt tính cước (FR31).
+
+x-events-published:
+  - name: payment.completed
+    description: Phát khi thanh toán thành công — Trip Service & Notification Service lắng nghe (FR41).
+  - name: payment.fallback_cash
+    description: Phát khi điện tử thất bại sau retry, tự chuyển tiền mặt — Notification Service báo khách.
