@@ -116,7 +116,7 @@ quadrantChart
 | App di động native hoàn chỉnh                      | MVP tập trung luồng nghiệp vụ & demo.                                                       |
 | Auto-scaling / HA đầy đủ                           | MVP đảm bảo kiến trúc tách rời/module hóa; tối ưu tải thực làm ở giai đoạn scale-up.        |
 
-### C. Chiến lược cắt phạm vi cho 7 tuần (Build vs. Mock)
+### C. Chiến lược cắt phạm vi (Build vs. Mock)
 
 | Thành phần         | Cách làm trong MVP                                                             | Vẫn nghiệm thu được gì                          |
 |--------------------|--------------------------------------------------------------------------------|-------------------------------------------------|
@@ -128,6 +128,19 @@ quadrantChart
 | Hủy chuyến (BR21)  | Chỉ làm nhánh **hủy miễn phí khi đang tìm tài xế**; phí hủy để config, làm sau | Cơ chế hủy + áp chính sách (AC38–AC39)          |
 | Offline (EX09)     | Grace 60s ở mức xử lý lại/đồng bộ đơn giản                                     | Không mất trạng thái khi rớt mạng ngắn (AC40)   |
 | Retention (NFR13)  | Chỉ đặt tham số ở config; job dọn dữ liệu tự động làm sau                      | Giá trị lưu trữ có ở cấu hình (AC41)            |
+
+### D. Những điểm chưa xác định chi tiết trong MVP (cần xác nhận với khách hàng)
+
+| \#  | Điểm chưa chốt                        | Trạng thái                                                                                    | Câu hỏi cho khách hàng                                                   |
+|-----|---------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| 1   | Cách tính cước                        | Có default (12k + 10k/km)                                                                     | Biểu giá chính thức? Có phụ phí giờ cao điểm/quãng đường tối thiểu?      |
+| 2   | Tiêu chí ưu tiên tài xế               | Có default (gần nhất → đánh giá cao)                                                          | Có thêm tiêu chí (tỷ lệ nhận chuyến, thời gian chờ của tài xế)?          |
+| 3   | Thời gian tài xế phản hồi             | Có default (20 giây)                                                                          | Ngưỡng chính thức? Khác nhau theo khung giờ?                             |
+| 4   | Chính sách hủy chuyến & phí hủy       | Có default (miễn phí trước khi có tài xế; 10.000đ khi chưa đón khách; chặn sau khi đón khách) | Mức phí chính thức? Có phí hủy phía tài xế? Có giới hạn số lần hủy/ngày? |
+| 5   | Xử lý mất kết nối mạng (EX09)         | Có default (grace 60 giây, đồng bộ lại khi online)                                            | Grace period chính thức? Quá hạn thì tự hủy hay giữ *cần vận hành*?      |
+| 6   | Thời gian lưu trữ dữ liệu (retention) | Có default (chuyến/giao dịch 12 tháng, vị trí 30 ngày, audit 12 tháng)                        | Có ràng buộc pháp lý/kiểm toán buộc lưu lâu hơn?                         |
+| 7   | Điều kiện dừng vòng ghép (EX01)       | Có default (tối đa 5 ứng viên **hoặc** 120 giây)                                              | Số ứng viên / tổng thời gian chính thức?                                 |
+| 8   | Số lần retry thanh toán điện tử       | Có default (2 lần → tiền mặt)                                                                 | Số lần chính thức? Sau fallback có cho thử lại điện tử không?            |
 
 ## Bước 5: Chuyển thành business requirement (BR)
 
@@ -484,49 +497,51 @@ Nhóm thực thể lõi cho MVP: CUSTOMER, DRIVER, VEHICLE, SERVICE_TYPE, TRIP, 
 ### B. Sơ đồ Use Case
 
 ```mermaid
-graph LR
-    KH["Khách hàng"]:::actor
-    TX["Tài xế"]:::actor
-    NV["NV Vận hành"]:::actor
+flowchart LR
+    KH["Khách hàng"]
+    TX["Tài xế"]
+    NV["NV Vận hành"]
+    PP["NCC Thanh toán<br/>(Payment Provider)"]
 
-    UC01(["UC01 · Đăng ký / Đăng nhập"])
-    UC02(["UC02 · Quản lý hồ sơ cá nhân"])
-    UC03(["UC03 · Đặt chuyến xe"])
-    UC04(["UC04 · Theo dõi chuyến đi"])
-    UC05(["UC05 · Thanh toán chuyến"])
-    UC06(["UC06 · Đánh giá tài xế"])
-    UC07(["UC07 · Xem lịch sử chuyến"])
-    UC08(["UC08 · Quản lý hồ sơ & phương tiện"])
-    UC09(["UC09 · Đổi trạng thái sẵn sàng"])
-    UC10(["UC10 · Nhận & phản hồi chuyến"])
-    UC11(["UC11 · Cập nhật tiến trình chuyến"])
-    UC12(["UC12 · Tìm & phân công tài xế"])
-    UC13(["UC13 · Tính cước"])
-    UC14(["UC14 · Quản trị & vận hành"])
+    subgraph CAB["CAB SYSTEM"]
+        UC01["UC01<br/>Đăng ký / Đăng nhập"]
+        UC02["UC02<br/>Quản lý hồ sơ cá nhân"]
+        UC03["UC03<br/>Đặt chuyến xe"]
+        UC04["UC04<br/>Theo dõi chuyến đi"]
+        UC05["UC05<br/>Thanh toán chuyến"]
+        UC06["UC06<br/>Đánh giá tài xế"]
+        UC07["UC07<br/>Xem lịch sử chuyến"]
+        UC08["UC08<br/>Quản lý hồ sơ & phương tiện"]
+        UC09["UC09<br/>Đổi trạng thái sẵn sàng"]
+        UC10["UC10<br/>Nhận & phản hồi chuyến"]
+        UC11["UC11<br/>Cập nhật tiến trình chuyến"]
+        UC12["UC12<br/>Tìm & phân công tài xế"]
+        UC13["UC13<br/>Tính cước"]
+        UC14["UC14<br/>Quản trị & vận hành"]
+    end
 
-    KH --- UC01
-    KH --- UC02
-    KH --- UC03
-    KH --- UC04
-    KH --- UC05
-    KH --- UC06
-    KH --- UC07
+    KH --> UC01
+    KH --> UC02
+    KH --> UC03
+    KH --> UC04
+    KH --> UC05
+    KH --> UC06
+    KH --> UC07
 
-    TX --- UC01
-    TX --- UC08
-    TX --- UC09
-    TX --- UC10
-    TX --- UC11
+    TX --> UC01
+    TX --> UC08
+    TX --> UC09
+    TX --> UC10
+    TX --> UC11
 
-    NV --- UC14
+    NV --> UC14
+    PP --> UC05
 
     UC03 -.->|include| UC12
     UC12 -.->|include| UC10
     UC11 -.->|include| UC13
     UC05 -.->|extend| UC11
     UC06 -.->|extend| UC11
-
-    classDef actor fill:#cfe3ff,stroke:#2b6cb0,stroke-width:1px,font-weight:bold;
 ```
 
 *Sơ đồ 3 — Use Case (14 UC)*
@@ -1076,16 +1091,3 @@ Mỗi AC là một điều kiện kiểm chứng được — QA chuyển thẳn
 | BG03       | BR21                   | FR53                   | —            | AC39 |
 | BG08       | BR21 (chung)           | FR54                   | — (NFR/EX09) | AC40 |
 | BG10       | BR20 (chung)           | FR51, FR30             | — (NFR13)    | AC41 |
-
-## Phụ lục A – Câu hỏi cần xác nhận với khách hàng (Open Items)
-
-| \#  | Điểm chưa chốt                        | Trạng thái                                                                                    | Câu hỏi cho khách hàng                                                   |
-|-----|---------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| 1   | Cách tính cước                        | Có default (12k + 10k/km)                                                                     | Biểu giá chính thức? Có phụ phí giờ cao điểm/quãng đường tối thiểu?      |
-| 2   | Tiêu chí ưu tiên tài xế               | Có default (gần nhất → đánh giá cao)                                                          | Có thêm tiêu chí (tỷ lệ nhận chuyến, thời gian chờ của tài xế)?          |
-| 3   | Thời gian tài xế phản hồi             | Có default (20 giây)                                                                          | Ngưỡng chính thức? Khác nhau theo khung giờ?                             |
-| 4   | Chính sách hủy chuyến & phí hủy       | Có default (miễn phí trước khi có tài xế; 10.000đ khi chưa đón khách; chặn sau khi đón khách) | Mức phí chính thức? Có phí hủy phía tài xế? Có giới hạn số lần hủy/ngày? |
-| 5   | Xử lý mất kết nối mạng (EX09)         | Có default (grace 60 giây, đồng bộ lại khi online)                                            | Grace period chính thức? Quá hạn thì tự hủy hay giữ *cần vận hành*?      |
-| 6   | Thời gian lưu trữ dữ liệu (retention) | Có default (chuyến/giao dịch 12 tháng, vị trí 30 ngày, audit 12 tháng)                        | Có ràng buộc pháp lý/kiểm toán buộc lưu lâu hơn?                         |
-| 7   | Điều kiện dừng vòng ghép (EX01)       | Có default (tối đa 5 ứng viên **hoặc** 120 giây)                                              | Số ứng viên / tổng thời gian chính thức?                                 |
-| 8   | Số lần retry thanh toán điện tử       | Có default (2 lần → tiền mặt)                                                                 | Số lần chính thức? Sau fallback có cho thử lại điện tử không?            |
