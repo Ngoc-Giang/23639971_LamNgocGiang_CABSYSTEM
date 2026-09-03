@@ -1,0 +1,224 @@
+openapi: 3.0.3
+
+info:
+  title: CAB - Customer API
+  version: "0.1.0"
+  description: API quản lý hồ sơ và lịch sử chuyến đi của khách hàng.
+
+servers:
+  - url: https://api.cab.example.com/v1
+    description: Mock/Dev Server
+
+tags:
+  - name: Customer
+
+paths:
+
+  /customers/me:
+    get:
+      tags:
+        - Customer
+      summary: Xem hồ sơ cá nhân
+      security:
+        - bearerAuth: []
+
+      responses:
+        "200":
+          description: Lấy thông tin hồ sơ thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+              example:
+                message: "Lấy hồ sơ thành công"
+                data:
+                  id: "CUS001"
+                  ho_ten: "Nguyen Van A"
+                  sdt: "0901234567"
+                  email: "nguyenvana@gmail.com"
+
+        "401":
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+    put:
+      tags:
+        - Customer
+      summary: Cập nhật hồ sơ cá nhân
+      x-fr:
+        - FR03
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerUpdateRequest"
+            example:
+              ho_ten: "Nguyen Van A"
+              sdt: "0901234567"
+              email: "nguyenvana@gmail.com"
+
+      responses:
+        "200":
+          description: Cập nhật hồ sơ thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+              example:
+                message: "Cập nhật hồ sơ thành công"
+                data:
+                  id: "CUS001"
+                  ho_ten: "Nguyen Van A"
+                  sdt: "0901234567"
+                  email: "nguyenvana@gmail.com"
+
+        "400":
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "409":
+          description: Số điện thoại hoặc email đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /customers/me/trips:
+    get:
+      tags:
+        - Customer
+      summary: Xem lịch sử chuyến đi
+      x-fr:
+        - FR04
+      x-ac:
+        - AC13
+      security:
+        - bearerAuth: []
+
+      responses:
+        "200":
+          description: Lấy lịch sử chuyến đi thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripListResponse"
+              example:
+                message: "Lấy lịch sử chuyến thành công"
+                data:
+                  - id: "TRIP001"
+                    customer_id: "CUS001"
+                    driver_id: "DRV001"
+                    service_type_id: "CAR4"
+                    diem_don: "Đại học ABC"
+                    diem_den: "Vincom"
+                    trang_thai: "hoan_thanh"
+
+        "401":
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    CustomerUpdateRequest:
+      type: object
+      properties:
+        ho_ten:
+          type: string
+          description: Họ và tên khách hàng
+        sdt:
+          type: string
+          description: Số điện thoại
+        email:
+          type: string
+          format: email
+          description: Email khách hàng
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        ho_ten:
+          type: string
+        sdt:
+          type: string
+        email:
+          type: string
+          format: email
+
+    CustomerResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/Customer"
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+        customer_id:
+          type: string
+        driver_id:
+          type: string
+          nullable: true
+        service_type_id:
+          type: string
+        diem_don:
+          type: string
+        diem_den:
+          type: string
+        trang_thai:
+          type: string
+          enum:
+            - dang_tim_tai_xe
+            - da_nhan
+            - da_den_diem_don
+            - da_don_khach
+            - dang_di_chuyen
+            - hoan_thanh
+            - da_huy
+
+    TripListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trip"
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
