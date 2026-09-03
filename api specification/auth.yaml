@@ -1,0 +1,436 @@
+openapi: 3.0.3
+
+info:
+  title: CAB - Auth API
+  version: "0.1.0"
+  description: API xác thực và đăng ký tài khoản cho hệ thống CAB.
+
+servers:
+  - url: https://api.cab.example.com/v1
+    description: Mock/Dev Server
+
+tags:
+  - name: Auth
+    description: Đăng ký và đăng nhập tài khoản
+
+paths:
+
+  # ============================================================
+  # 1. ĐĂNG KÝ KHÁCH HÀNG
+  # ============================================================
+  /auth/register/customer:
+    post:
+      tags:
+        - Auth
+      summary: Đăng ký tài khoản khách hàng
+      description: Cho phép khách hàng tạo tài khoản mới.
+      x-fr:
+        - FR01
+      x-ac:
+        - AC01
+        - AC02
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerRegisterRequest"
+            example:
+              ho_ten: "Nguyen Van A"
+              sdt: "0901234567"
+              email: "nguyenvana@gmail.com"
+              mat_khau: "123456"
+
+      responses:
+
+        "201":
+          description: Đăng ký tài khoản thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRegisterResponse"
+              example:
+                message: "Đăng ký tài khoản thành công"
+                data:
+                  id: "CUS001"
+                  ho_ten: "Nguyen Van A"
+                  sdt: "0901234567"
+                  email: "nguyenvana@gmail.com"
+
+        "400":
+          description: Dữ liệu đăng ký không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "INVALID_DATA"
+                message: "Thông tin đăng ký không hợp lệ"
+
+        "409":
+          description: Số điện thoại hoặc email đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "CUSTOMER_EXISTS"
+                message: "Số điện thoại hoặc email đã tồn tại"
+
+
+  # ============================================================
+  # 2. ĐĂNG KÝ TÀI XẾ
+  # ============================================================
+  /auth/register/driver:
+    post:
+      tags:
+        - Auth
+      summary: Đăng ký tài khoản tài xế
+      description: Cho phép tạo tài khoản tài xế.
+      x-fr:
+        - FR05
+      x-ac:
+        - AC14
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriverRegisterRequest"
+            example:
+              ho_ten: "Tran Van B"
+              sdt: "0912345678"
+              mat_khau: "123456"
+              tao_boi: "self"
+
+      responses:
+
+        "201":
+          description: Tạo tài khoản tài xế thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriverRegisterResponse"
+              example:
+                message: "Tạo tài khoản tài xế thành công"
+                data:
+                  id: "DRV001"
+                  ho_ten: "Tran Van B"
+                  sdt: "0912345678"
+                  trang_thai: "unavailable"
+                  diem_danh_gia: 0
+
+        "400":
+          description: Dữ liệu đăng ký không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "INVALID_DATA"
+                message: "Thông tin đăng ký không hợp lệ"
+
+        "409":
+          description: Số điện thoại đã tồn tại
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "DRIVER_EXISTS"
+                message: "Số điện thoại đã tồn tại"
+
+
+  # ============================================================
+  # 3. ĐĂNG NHẬP
+  # ============================================================
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Đăng nhập
+      description: Đăng nhập bằng số điện thoại hoặc email và mật khẩu.
+      x-fr:
+        - FR02
+      x-ac:
+        - AC01
+        - AC03
+        - AC14
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              dinh_danh: "0901234567"
+              mat_khau: "123456"
+
+      responses:
+
+        "200":
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+              example:
+                message: "Đăng nhập thành công"
+                data:
+                  access_token: "eyJhbGciOiJIUzI1NiIs..."
+                  role: "customer"
+
+        "400":
+          description: Thiếu thông tin đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "MISSING_DATA"
+                message: "Vui lòng nhập thông tin đăng nhập"
+
+        "401":
+          description: Sai thông tin đăng nhập
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: "INVALID_CREDENTIALS"
+                message: "Số điện thoại/email hoặc mật khẩu không đúng"
+
+
+# ================================================================
+# COMPONENTS
+# ================================================================
+components:
+
+  schemas:
+
+    # ------------------------------------------------------------
+    # REQUEST - Đăng ký Customer
+    # ------------------------------------------------------------
+    CustomerRegisterRequest:
+      type: object
+      required:
+        - ho_ten
+        - sdt
+        - mat_khau
+      properties:
+        ho_ten:
+          type: string
+          description: Họ và tên khách hàng
+          example: "Nguyen Van A"
+
+        sdt:
+          type: string
+          description: Số điện thoại
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          description: Email khách hàng
+          example: "nguyenvana@gmail.com"
+
+        mat_khau:
+          type: string
+          format: password
+          description: Mật khẩu đăng nhập
+          example: "123456"
+
+
+    # ------------------------------------------------------------
+    # RESPONSE - Đăng ký Customer
+    # ------------------------------------------------------------
+    CustomerRegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Đăng ký tài khoản thành công"
+
+        data:
+          $ref: "#/components/schemas/Customer"
+
+
+    # ------------------------------------------------------------
+    # REQUEST - Đăng ký Driver
+    # ------------------------------------------------------------
+    DriverRegisterRequest:
+      type: object
+      required:
+        - ho_ten
+        - sdt
+        - mat_khau
+      properties:
+        ho_ten:
+          type: string
+          description: Họ và tên tài xế
+          example: "Tran Van B"
+
+        sdt:
+          type: string
+          description: Số điện thoại tài xế
+          example: "0912345678"
+
+        mat_khau:
+          type: string
+          format: password
+          description: Mật khẩu đăng nhập
+          example: "123456"
+
+        tao_boi:
+          type: string
+          description: Người tạo tài khoản
+          enum:
+            - self
+            - operations_staff
+          default: self
+          example: self
+
+
+    # ------------------------------------------------------------
+    # RESPONSE - Đăng ký Driver
+    # ------------------------------------------------------------
+    DriverRegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Tạo tài khoản tài xế thành công"
+
+        data:
+          $ref: "#/components/schemas/Driver"
+
+
+    # ------------------------------------------------------------
+    # REQUEST - Login
+    # ------------------------------------------------------------
+    LoginRequest:
+      type: object
+      required:
+        - dinh_danh
+        - mat_khau
+      properties:
+        dinh_danh:
+          type: string
+          description: Số điện thoại hoặc email
+          example: "0901234567"
+
+        mat_khau:
+          type: string
+          format: password
+          description: Mật khẩu
+          example: "123456"
+
+
+    # ------------------------------------------------------------
+    # RESPONSE - Login
+    # ------------------------------------------------------------
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Đăng nhập thành công"
+
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token
+              example: "eyJhbGciOiJIUzI1NiIs..."
+
+            role:
+              type: string
+              enum:
+                - customer
+                - driver
+              example: customer
+
+
+    # ------------------------------------------------------------
+    # CUSTOMER
+    # ------------------------------------------------------------
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID khách hàng
+          example: "CUS001"
+
+        ho_ten:
+          type: string
+          description: Họ và tên
+          example: "Nguyen Van A"
+
+        sdt:
+          type: string
+          description: Số điện thoại
+          example: "0901234567"
+
+        email:
+          type: string
+          format: email
+          description: Email
+          example: "nguyenvana@gmail.com"
+
+
+    # ------------------------------------------------------------
+    # DRIVER
+    # ------------------------------------------------------------
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID tài xế
+          example: "DRV001"
+
+        ho_ten:
+          type: string
+          description: Họ và tên
+          example: "Tran Van B"
+
+        sdt:
+          type: string
+          description: Số điện thoại
+          example: "0912345678"
+
+        trang_thai:
+          type: string
+          enum:
+            - available
+            - unavailable
+            - on_trip
+          example: unavailable
+
+        diem_danh_gia:
+          type: number
+          format: float
+          example: 0
+
+
+    # ------------------------------------------------------------
+    # ERROR
+    # ------------------------------------------------------------
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "INVALID_DATA"
+
+        message:
+          type: string
+          example: "Thông tin không hợp lệ"
