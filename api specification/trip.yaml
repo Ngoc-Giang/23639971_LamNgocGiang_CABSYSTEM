@@ -3,13 +3,16 @@ info:
   title: CAB - Trip Service
   description: >
     Sở hữu vòng đời chuyến đi (tạo, theo dõi, cập nhật tiến trình, hủy) và
-    đánh giá sau chuyến. Sinh từ FR09-FR11, FR24-FR29, FR44, FR52-FR53 và
-    AC tương ứng trong SRS.
-  version: "0.1.0-mvp"
+    đánh giá sau chuyến. Chuẩn hoá điểm đón/đến (text tự do) thành toạ độ
+    qua Distance Provider, và tính khoảng cách chuyến khi hoàn thành.
+
+    Khi tạo chuyến, Trip Service gọi `POST /trips/{tripId}/dispatch` trên
+    Matching Service để bắt đầu ghép tài xế; Matching Service gọi lại
+    `POST /internal/trips/{tripId}/dispatch-result` khi có kết quả.
+  version: "1.0.0"
 
 servers:
-  - url: https://api.cab.example.com/trip-service
-    description: Mock/dev server
+  - url: http://localhost:8080/api/v1
 
 tags:
   - name: Trip
@@ -22,7 +25,8 @@ paths:
   /trips:
     post:
       tags: [Trip]
-      summary: Tạo chuyến — nhập điểm đón/đến, chọn loại xe, gửi yêu cầu
+      summary: Tạo chuyến — nhập điểm đón/đến (text tự do), chọn loại xe, gửi yêu cầu
+      operationId: createTrip
       x-fr: [FR09, FR10, FR11]
       x-ac: [AC04, AC05, AC06]
       requestBody:
@@ -33,24 +37,29 @@ paths:
               type: object
               required: [diem_don, diem_den, service_type_id]
               properties:
-                diem_don: { type: string }
-                diem_den: { type: string }
+                diem_don:
+                  type: string
+                  description: Text tự do — server quy đổi sang toạ độ qua Distance Provider
+                diem_den:
+                  type: string
+                  description: Text tự do — server quy đổi sang toạ độ qua Distance Provider
                 service_type_id: { type: string }
       responses:
         "201":
           description: >
-            Tạo chuyến ở trạng thái "đang tìm tài xế" (AC04) — phát event
-            `trip.created` để Matching Service bắt đầu ghép tài xế.
+            Tạo chuyến ở trạng thái "đang tìm tài xế". Phát event
+            `trip.created` và gọi `POST /trips/{tripId}/dispatch` trên
+            Matching Service để bắt đầu ghép tài xế.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Trip" }
         "400":
-          description: Thiếu điểm đón/đến (AC05)
+          description: Thiếu điểm đón/đến, hoặc không quy đổi được toạ độ
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "401":
-          description: Chưa đăng nhập (AC06, RULE13)
+          description: Chưa đăng nhập
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -59,18 +68,19 @@ paths:
     get:
       tags: [Trip]
       summary: Truy vấn trạng thái chuyến + ETA
-      x-fr: [FR24, FR25]
-      x-ac: [AC07, AC08]
+      operationId: getTrip
+      x-fr: [FR24, FR25, FR54]
+      x-ac: [AC07, AC08, AC48]
       parameters:
         - $ref: "#/components/parameters/TripId"
       responses:
         "200":
-          description: Trạng thái hiện tại của chuyến (AC07)
+          description: Trạng thái hiện tại của chuyến, kể cả sau khi khách reconnect.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Trip" }
         "403":
-          description: Không phải chủ chuyến (AC08, RULE16)
+          description: Không phải chủ chuyến
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -79,8 +89,9 @@ paths:
     patch:
       tags: [Trip]
       summary: Tài xế cập nhật tiến trình chuyến
-      x-fr: [FR26, FR27, FR28, FR29]
-      x-ac: [AC21, AC22]
+      operationId: updateTripStatus
+      x-fr: [FR26, FR27, FR28, FR29, FR54]
+      x-ac: [AC21, AC22, AC49]
       parameters:
         - $ref: "#/components/parameters/TripId"
       requestBody:
@@ -97,13 +108,14 @@ paths:
       responses:
         "200":
           description: >
-            Trạng thái được ghi nhận đúng thứ tự (AC21). Khi chuyển sang
-            `hoan_thanh`, phát event `trip.completed` để Payment Service tính cước.
+            Trạng thái được ghi nhận đúng thứ tự. Khi chuyển sang
+            `hoan_thanh`, Trip Service tính khoảng cách qua Distance
+            Provider rồi phát event `trip.completed` (kèm khoang_cach_km).
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Trip" }
         "409":
-          description: Cập nhật sai thứ tự vòng đời chuyến (AC22, RULE08, EX08)
+          description: Cập nhật sai thứ tự vòng đời chuyến
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -111,7 +123,8 @@ paths:
   /trips/{tripId}/cancel:
     post:
       tags: [Trip]
-      summary: Hủy chuyến (kiểm tra mốc cho phép + áp phí theo chính sách)
+      summary: Khách hủy chuyến (kiểm tra mốc cho phép + áp phí theo chính sách)
+      operationId: cancelTrip
       x-fr: [FR52, FR53]
       x-ac: [AC38, AC39]
       parameters:
@@ -119,13 +132,41 @@ paths:
       responses:
         "200":
           description: >
-            Hủy thành công — miễn phí khi đang tìm tài xế, hoặc áp phí 10.000đ
-            (default) khi đã có tài xế chưa đón khách (AC38).
+            Hủy thành công — miễn phí khi đang tìm tài xế, hoặc áp phí
+            10.000đ (default) khi đã có tài xế chưa đón khách. Phát event
+            `trip.cancelled`.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Trip" }
         "409":
-          description: Chuyến đã đón khách — bị chặn hủy (AC39, RULE17, EX10)
+          description: Chuyến đã đón khách — bị chặn hủy
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /trips/{tripId}/driver-cancel:
+    post:
+      tags: [Trip]
+      summary: "[Should-have] Tài xế hủy chuyến đã nhận, trước khi đón khách"
+      operationId: driverCancelTrip
+      x-priority: should-have
+      x-fr: [FR55]
+      x-ac: [AC47]
+      description: >
+        Chuyến chuyển về "đang tìm tài xế", driver_id bị xoá, và Trip
+        Service gọi lại `POST /trips/{tripId}/dispatch` trên Matching
+        Service với `exclude_driver_ids` chứa tài xế vừa hủy. Không tính
+        phí khách.
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Chuyến quay lại "đang tìm tài xế", vòng ghép mới được kích hoạt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
+        "409":
+          description: Chuyến đã ở trạng thái "đã đón khách" trở đi — không cho hủy
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -133,7 +174,9 @@ paths:
   /trips/{tripId}/rating:
     post:
       tags: [Rating]
-      summary: Khách đánh giá tài xế sau chuyến
+      summary: "[Should-have] Khách đánh giá tài xế sau chuyến"
+      operationId: rateTrip
+      x-priority: should-have
       x-fr: [FR44]
       x-ac: [AC11, AC12]
       parameters:
@@ -150,15 +193,71 @@ paths:
                 nhan_xet: { type: string }
       responses:
         "201":
-          description: Lưu đánh giá gắn với chuyến/tài xế (AC11)
+          description: Lưu đánh giá gắn với chuyến/tài xế
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Rating" }
         "409":
-          description: Chuyến chưa hoàn thành — từ chối đánh giá (AC12, RULE11)
+          description: Chuyến chưa hoàn thành — từ chối đánh giá
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+
+  /internal/trips/{tripId}/coordinates:
+    get:
+      tags: [Trip]
+      summary: "[internal] Lấy toạ độ điểm đón/đến của một chuyến"
+      operationId: getTripCoordinatesInternal
+      x-fr: [FR12]
+      x-ac: []
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      responses:
+        "200":
+          description: Toạ độ điểm đón/đến
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TripCoordinates" }
+
+  /internal/trips/{tripId}/dispatch-result:
+    post:
+      tags: [Trip]
+      summary: "[internal] Nhận kết quả vòng ghép tài xế từ Matching Service"
+      operationId: reportDispatchResult
+      x-fr: [FR20, FR23]
+      x-ac: [AC18, AC26]
+      description: >
+        status=DRIVER_ASSIGNED: cập nhật driver_id & trạng thái "da_nhan",
+        phát event `trip.driver_assigned`. status=NO_DRIVER_FOUND: cập
+        nhật trạng thái "khong_tim_duoc_tai_xe", phát event
+        `trip.matching_failed`.
+      security:
+        - internalServiceAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TripId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [DRIVER_ASSIGNED, NO_DRIVER_FOUND]
+                driver_id:
+                  type: string
+                  nullable: true
+                  description: Bắt buộc khi status=DRIVER_ASSIGNED
+      responses:
+        "200":
+          description: Đã cập nhật trạng thái chuyến
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trip" }
 
 components:
   securitySchemes:
@@ -166,6 +265,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    internalServiceAuth:
+      type: apiKey
+      in: header
+      name: X-Internal-Service-Key
 
   parameters:
     TripId:
@@ -188,8 +291,17 @@ components:
         customer_id: { type: string }
         driver_id: { type: string, nullable: true }
         service_type_id: { type: string }
-        diem_don: { type: string }
-        diem_den: { type: string }
+        diem_don_text: { type: string }
+        diem_don_lat: { type: number, format: float }
+        diem_don_lng: { type: number, format: float }
+        diem_den_text: { type: string }
+        diem_den_lat: { type: number, format: float }
+        diem_den_lng: { type: number, format: float }
+        khoang_cach_km:
+          type: number
+          format: float
+          nullable: true
+          description: Chỉ có giá trị sau khi chuyến hoàn thành
         trang_thai:
           type: string
           enum:
@@ -200,7 +312,17 @@ components:
             - dang_di_chuyen
             - hoan_thanh
             - da_huy
+            - khong_tim_duoc_tai_xe
         eta_phut: { type: integer, nullable: true }
+
+    TripCoordinates:
+      type: object
+      properties:
+        trip_id: { type: string }
+        diem_don_lat: { type: number, format: float }
+        diem_don_lng: { type: number, format: float }
+        diem_den_lat: { type: number, format: float }
+        diem_den_lng: { type: number, format: float }
 
     Rating:
       type: object
@@ -212,14 +334,37 @@ components:
 
 x-events-published:
   - name: trip.created
-    description: Phát khi tạo chuyến thành công — Matching Service lắng nghe để bắt đầu ghép tài xế.
-  - name: trip.driver_assigned
-    description: Phát khi tài xế được gán — Notification Service lắng nghe để báo khách (FR38).
-  - name: trip.completed
-    description: Phát khi chuyến hoàn thành — Payment Service lắng nghe để tính cước (FR31).
-  - name: trip.status_changed
-    description: Phát mỗi mốc cập nhật — Notification Service lắng nghe để báo khách (FR37-FR40).
+    x-fr: [FR37]
+    x-ac: [AC33]
+    description: Notification Service nghe để báo khách "đã tiếp nhận yêu cầu".
+    payload: { trip_id: string, customer_id: string, service_type_id: string }
 
-x-events-consumed:
-  - name: matching.driver_offered
-    description: Matching Service phát khi có tài xế được gán — cập nhật driver_id & trạng thái "đã nhận".
+  - name: trip.driver_assigned
+    x-fr: [FR38]
+    x-ac: [AC18]
+    description: Notification Service nghe để báo khách "có tài xế nhận".
+    payload: { trip_id: string, driver_id: string }
+
+  - name: trip.status_changed
+    x-fr: [FR39, FR40, FR43]
+    x-ac: [AC33, AC34]
+    description: Notification Service nghe để báo khách/tài xế mỗi mốc cập nhật tiến trình.
+    payload: { trip_id: string, trang_thai: string }
+
+  - name: trip.matching_failed
+    x-fr: [FR20]
+    x-ac: [AC26]
+    description: Notification Service nghe để báo khách "không tìm được tài xế".
+    payload: { trip_id: string }
+
+  - name: trip.completed
+    x-fr: [FR31]
+    x-ac: [AC27]
+    description: Payment Service nghe để tính cước.
+    payload: { trip_id: string, khoang_cach_km: number, service_type_id: string }
+
+  - name: trip.cancelled
+    x-fr: [FR52, FR53, FR55]
+    x-ac: [AC38, AC39, AC47]
+    description: Notification Service nghe để báo khách/tài xế liên quan.
+    payload: { trip_id: string, huy_boi: "customer|driver", phi_huy: number }
