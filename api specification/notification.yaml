@@ -2,22 +2,20 @@ openapi: 3.0.3
 info:
   title: CAB - Notification Service
   description: >
-    LƯU Ý: Service này KHÔNG có REST endpoint công khai. Nó chỉ lắng nghe
-    event từ Trip Service, Matching Service và Payment Service rồi gửi
-    thông báo (MVP: ghi log / in ra, chưa gửi SMS/Push thật — xem Bước 4C).
-    File này chỉ dùng để tài liệu hoá "hợp đồng" event, không phải spec
-    OpenAPI đầy đủ. Nếu cần chuẩn async thật, nên chuyển sang AsyncAPI.
-    Sinh từ FR37-FR43 và AC33, AC34 trong SRS.
-  version: "0.1.0-mvp"
+    Không có REST endpoint công khai ngoài health check. Lắng nghe event
+    từ Trip Service, Payment Service và Matching Service, rồi gửi thông
+    báo (MVP: ghi log / in ra). File này tài liệu hoá "hợp đồng" event,
+    không phải spec OpenAPI đầy đủ.
+  version: "1.0.0"
 
 servers:
-  - url: https://api.cab.example.com/notification-service
-    description: Mock/dev server
+  - url: http://localhost:8080/api/v1
 
 paths:
   /health:
     get:
       summary: Health check (endpoint duy nhất công khai của service này)
+      operationId: healthCheck
       responses:
         "200":
           description: Service đang chạy bình thường
@@ -27,21 +25,39 @@ x-events-consumed:
     from: Trip Service
     x-fr: [FR37]
     x-ac: [AC33]
-    description: Thông báo khách "đã tiếp nhận yêu cầu".
+    description: Thông báo khách "đã tiếp nhận yêu cầu", ngay khi tạo chuyến.
 
-  - name: matching.driver_offered
-    from: Matching Service
-    x-fr: [FR38, FR42]
-    x-ac: [AC33, AC34]
-    description: Thông báo khách "có tài xế nhận" + thông báo tài xế "chuyến mới".
+  - name: trip.driver_assigned
+    from: Trip Service
+    x-fr: [FR38]
+    x-ac: [AC18, AC33]
+    description: Thông báo khách "có tài xế nhận".
 
   - name: trip.status_changed
     from: Trip Service
     x-fr: [FR39, FR40, FR43]
     x-ac: [AC33, AC34]
     description: >
-      Thông báo khách khi tài xế đến điểm đón / hoàn thành chuyến (FR39, FR40).
-      Thông báo tài xế khi có thay đổi ở chuyến đang chạy (FR43).
+      Thông báo khách khi tài xế đến điểm đón / hoàn thành chuyến.
+      Thông báo tài xế khi có thay đổi ở chuyến đang chạy.
+
+  - name: trip.matching_failed
+    from: Trip Service
+    x-fr: [FR20]
+    x-ac: [AC26, AC33]
+    description: Thông báo khách "không tìm được tài xế".
+
+  - name: trip.cancelled
+    from: Trip Service
+    x-fr: [FR52, FR53, FR55]
+    x-ac: [AC38, AC39, AC47]
+    description: Thông báo bên còn lại (khách hoặc tài xế) khi có một bên hủy chuyến.
+
+  - name: matching.offer_sent
+    from: Matching Service
+    x-fr: [FR42]
+    x-ac: []
+    description: Thông báo tài xế "chuyến mới".
 
   - name: payment.completed
     from: Payment Service
@@ -52,16 +68,9 @@ x-events-consumed:
   - name: payment.fallback_cash
     from: Payment Service
     x-fr: [FR41]
-    x-ac: [AC33]
+    x-ac: [AC10, AC33]
     description: Thông báo khách việc điện tử thất bại, đã chuyển tiền mặt.
 
-  - name: matching.failed
-    from: Matching Service
-    x-fr: [FR20]
-    x-ac: [AC26]
-    description: Thông báo khách "không tìm được tài xế".
-
 x-mvp-note: >
-  Theo Bước 4C (Build vs Mock): MVP chỉ ghi log/in ra tại đúng thời điểm,
-  không tích hợp SMS/Push thật. Nghiệm thu bằng AC33/AC34 (đúng thời điểm
-  & nội dung thông báo), không nghiệm thu việc gửi thật tới thiết bị.
+  MVP chỉ ghi log/in ra tại đúng thời điểm, không tích hợp SMS/Push thật.
+  Nghiệm thu bằng đúng thời điểm & nội dung thông báo.
