@@ -2,14 +2,18 @@ openapi: 3.0.3
 info:
   title: CAB - Matching Service
   description: >
-    Tìm & phân công tài xế. Phần lớn được kích hoạt nội bộ (event từ Trip
-    Service), chỉ có 1 endpoint công khai cho tài xế phản hồi đề xuất.
-    Sinh từ FR12-FR23 và AC tương ứng trong SRS (UC12).
-  version: "0.1.0-mvp"
+    Tìm & phân công tài xế. Trip Service gọi đồng bộ để bắt đầu một vòng
+    ghép; tài xế nhận đề xuất và phản hồi qua 2 endpoint riêng (accept/reject).
+
+    Toạ độ điểm đón lấy bằng cách gọi `GET
+    /internal/trips/{tripId}/coordinates` trên Trip Service ngay khi bắt
+    đầu vòng ghép — bán kính và ưu tiên tính bằng Haversine trên toạ độ
+    đó. Timeout job 20 giây/tài xế và giới hạn vòng ghép 5 tài xế/120 giây
+    được tài liệu hoá ở mục `x-internal-process` bên dưới.
+  version: "1.0.0"
 
 servers:
-  - url: https://api.cab.example.com/matching-service
-    description: Mock/dev server
+  - url: http://localhost:8080/api/v1
 
 tags:
   - name: Matching
@@ -18,71 +22,115 @@ security:
   - bearerAuth: []
 
 paths:
-  /matching/requests:
+  /trips/{tripId}/dispatch:
     post:
       tags: [Matching]
-      summary: >
-        [internal] Kích hoạt khi nhận event trip.created từ Trip Service.
-        Xác định vị trí khách, lọc tài xế theo bán kính + loại xe, xếp ưu tiên.
+      summary: Bắt đầu (hoặc bắt đầu lại) vòng ghép tài xế cho một chuyến
+      operationId: dispatchDriver
       x-fr: [FR12, FR13, FR14, FR15, FR16]
-      x-ac: [AC23, AC24]
+      x-ac: [AC23, AC24, AC47]
+      description: >
+        Lấy toạ độ điểm đón từ Trip Service, lọc tài xế available đúng
+        loại xe trong bán kính 1 km (default, Haversine), ưu tiên gần
+        nhất — hòa thì đánh giá cao hơn — rồi gửi đề xuất tới tài xế đầu
+        danh sách. Khi có kết quả cuối cùng (một tài xế nhận, hoặc hết
+        ứng viên), gọi `POST /internal/trips/{tripId}/dispatch-result`
+        trên Trip Service.
       security:
         - internalServiceAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TripId"
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
               type: object
-              required: [trip_id]
               properties:
-                trip_id: { type: string }
+                exclude_driver_ids:
+                  type: array
+                  items: { type: string }
+                  default: []
       responses:
         "202":
           description: >
-            Vòng tìm tài xế đã bắt đầu (AC23) — chỉ xét tài xế available,
-            trong bán kính 1 km (default), đúng loại xe (RULE01/RULE04).
-            Ưu tiên gần nhất; hòa → đánh giá cao hơn (AC24, RULE05, default).
-
-  /trip-offers/{offerId}/respond:
-    post:
-      tags: [Matching]
-      summary: Tài xế chấp nhận / từ chối đề xuất chuyến
-      x-fr: [FR17, FR18, FR19, FR21, FR22, FR23]
-      x-ac: [AC18, AC19, AC20, AC25, AC26]
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema: { type: string }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [phan_hoi]
-              properties:
-                phan_hoi: { type: string, enum: [accept, reject] }
-      responses:
-        "200":
-          description: >
-            Chấp nhận — chuyến được gán, phát event matching.driver_offered
-            để Trip Service cập nhật + Notification Service báo khách (AC18).
+            Vòng ghép bắt đầu chạy; trạng thái trả về là
+            SEARCHING_DRIVER — kết quả cuối cùng được báo qua
+            dispatch-result.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/TripOffer" }
-        "409":
-          description: Tài xế đang thực hiện chuyến khác — không gán trùng (AC20, RULE03)
+              schema: { $ref: "#/components/schemas/DispatchResult" }
+        "404":
+          description: Không tìm thấy chuyến
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
-        "410":
+
+  /drivers/me/trip-requests:
+    get:
+      tags: [Matching]
+      summary: Xem các đề xuất chuyến đang chờ tài xế phản hồi
+      operationId: getTripRequests
+      x-fr: [FR21]
+      x-ac: []
+      responses:
+        "200":
+          description: Danh sách đề xuất đang chờ (thường chỉ 0 hoặc 1)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TripDispatchRequest" }
+
+  /drivers/me/trip-requests/{requestId}/accept:
+    post:
+      tags: [Matching]
+      summary: Tài xế nhận chuyến
+      operationId: acceptTrip
+      x-fr: [FR22, FR23]
+      x-ac: [AC18, AC20]
+      description: >
+        Gán chuyến cho tài xế, gọi `POST
+        /internal/trips/{tripId}/dispatch-result` (status=DRIVER_ASSIGNED)
+        trên Trip Service.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Nhận chuyến thành công
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DispatchResult" }
+        "409":
           description: >
-            Từ chối hoặc hết 20 giây (default) không phản hồi — coi như từ
-            chối, tự chuyển tài xế kế tiếp không bắt khách tạo lại
-            (AC19, AC25, RULE06/07, EX02). Hết ứng viên hoặc quá 120s/5 tài
-            xế (default) → phát event matching.failed, EX01 (AC26).
+            Yêu cầu đã hết hạn / không còn hợp lệ, hoặc tài xế đang thực
+            hiện chuyến khác — không gán trùng.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /drivers/me/trip-requests/{requestId}/reject:
+    post:
+      tags: [Matching]
+      summary: Tài xế từ chối chuyến
+      operationId: rejectTrip
+      x-fr: [FR19, FR22]
+      x-ac: [AC19, AC25]
+      description: >
+        Loại tài xế khỏi vòng ghép hiện tại, tự động chọn tài xế kế tiếp
+        và gửi đề xuất mới. Nếu hết ứng viên (hoặc đã thử 5 tài xế, hoặc
+        quá 120 giây — điều kiện nào đến trước), gọi dispatch-result với
+        status=NO_DRIVER_FOUND.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Từ chối thành công, đã chuyển sang tài xế kế tiếp (nếu còn)
+        "409":
+          description: Yêu cầu đã hết hạn hoặc không còn hợp lệ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
 components:
   securitySchemes:
@@ -94,7 +142,18 @@ components:
       type: apiKey
       in: header
       name: X-Internal-Service-Key
-      description: Dùng khi Trip Service gọi trực tiếp (thay vì qua event bus)
+
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema: { type: string }
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema: { type: string }
 
   schemas:
     Error:
@@ -103,21 +162,52 @@ components:
         code: { type: string }
         message: { type: string }
 
-    TripOffer:
+    TripDispatchRequest:
       type: object
       properties:
-        id: { type: string }
-        trip_id: { type: string }
-        driver_id: { type: string }
-        trang_thai: { type: string, enum: [pending, accepted, rejected, timeout] }
-        thoi_diem: { type: string, format: date-time }
+        requestId: { type: string }
+        tripId: { type: string }
+        expiresAt: { type: string, format: date-time }
+
+    DispatchResult:
+      type: object
+      properties:
+        tripId: { type: string }
+        driverId: { type: string, nullable: true }
+        status:
+          type: string
+          enum: [SEARCHING_DRIVER, DRIVER_ASSIGNED, NO_DRIVER_FOUND]
+
+x-internal-process:
+  - name: offer_timeout_job
+    x-fr: [FR18]
+    x-ac: [AC19]
+    description: >
+      Vòng lặp `setInterval` (VD mỗi 2-3 giây) quét các trip-request đang
+      "pending" quá 20 giây (default). Yêu cầu nào khớp điều kiện → xử lý
+      y hệt nhánh reject.
+  - name: round_timeout_guard
+    x-fr: [FR20]
+    x-ac: [AC26]
+    description: >
+      Cùng vòng lặp trên, kiểm tra thêm mỗi vòng ghép (1 tripId): dừng và
+      gọi dispatch-result với status=NO_DRIVER_FOUND khi chạm một trong 3
+      điều kiện: đã thử 5 tài xế (default), quá 120 giây kể từ lúc bắt
+      đầu vòng (default), hoặc hết ứng viên phù hợp trong bán kính.
 
 x-events-consumed:
-  - name: trip.created
-    description: Trip Service phát khi có chuyến mới ở trạng thái "đang tìm tài xế" — kích hoạt vòng ghép.
+  - name: driver.location_updated
+    from: Auth Service
+    x-fr: [FR30]
+    x-ac: [AC35]
+    description: >
+      Cập nhật cache vị trí tài xế (driver_id → lat/lng mới nhất), phục
+      vụ lọc bán kính ở lần ghép tiếp theo.
+    payload: { driver_id: string, lat: number, lng: number }
 
 x-events-published:
-  - name: matching.driver_offered
-    description: Phát khi một tài xế chấp nhận đề xuất — Trip Service & Notification Service lắng nghe.
-  - name: matching.failed
-    description: Phát khi hết ứng viên hoặc quá 120s/5 tài xế (default) mà không ai nhận — Trip Service cập nhật trạng thái, Notification báo khách "không tìm được tài xế".
+  - name: matching.offer_sent
+    x-fr: [FR17, FR42]
+    x-ac: []
+    description: Notification Service nghe để báo tài xế "có chuyến mới".
+    payload: { trip_id: string, driver_id: string, offer_id: string, expires_at: string }
