@@ -2,14 +2,13 @@ openapi: 3.0.3
 info:
   title: CAB - Admin/Ops Service
   description: >
-    Giao diện quản trị & vận hành cho Operations Staff. Sinh từ FR45-FR49,
-    FR51 và AC tương ứng trong SRS (UC14 Quản trị & vận hành). Mọi endpoint
-    dưới `/admin/*` đều đi qua middleware phân quyền (FR49, RULE12).
-  version: "0.1.0-mvp"
+    Giao diện quản trị & vận hành cho Operations Staff. Mọi
+    endpoint dưới `/admin/*` đi qua middleware phân quyền. Chủ yếu xem
+    danh sách và xử lý sự cố (resolve).
+  version: "1.0.0"
 
 servers:
-  - url: https://api.cab.example.com/admin-service
-    description: Mock/dev server
+  - url: http://localhost:8080/api/v1
 
 tags:
   - name: Admin
@@ -22,7 +21,8 @@ paths:
   /admin/customers:
     get:
       tags: [Admin]
-      summary: Danh sách khách hàng (CRUD quản trị)
+      summary: Danh sách khách hàng (xem, tối giản)
+      operationId: listCustomers
       x-fr: [FR45]
       x-ac: []
       responses:
@@ -34,7 +34,7 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/CustomerRef" }
         "403":
-          description: Không đủ quyền (AC30, RULE12)
+          description: Không đủ quyền
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -42,7 +42,8 @@ paths:
   /admin/drivers:
     get:
       tags: [Admin]
-      summary: Danh sách tài xế (CRUD quản trị)
+      summary: Danh sách tài xế (xem, tối giản)
+      operationId: listDrivers
       x-fr: [FR45]
       x-ac: []
       responses:
@@ -54,10 +55,27 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/DriverRef" }
 
+  /admin/vehicles:
+    get:
+      tags: [Admin]
+      summary: Danh sách phương tiện (xem, tối giản)
+      operationId: listVehicles
+      x-fr: [FR45]
+      x-ac: []
+      responses:
+        "200":
+          description: Danh sách phương tiện
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleRef" }
+
   /admin/trips:
     get:
       tags: [Admin]
       summary: Xem chuyến đang diễn ra + trạng thái tài xế
+      operationId: listActiveTrips
       x-fr: [FR46]
       x-ac: [AC36]
       parameters:
@@ -66,7 +84,7 @@ paths:
           schema: { type: string, example: active }
       responses:
         "200":
-          description: Danh sách chuyến đang chạy (AC36)
+          description: Danh sách chuyến đang chạy
           content:
             application/json:
               schema:
@@ -76,17 +94,34 @@ paths:
   /admin/trips/{tripId}/resolve:
     post:
       tags: [Admin]
-      summary: Hỗ trợ xử lý chuyến bị lỗi
+      summary: Hỗ trợ xử lý chuyến bị lỗi (kẹt trạng thái, sai dữ liệu)
+      operationId: resolveTrip
       x-fr: [FR47]
-      x-ac: []
+      x-ac: [AC50]
       parameters:
         - name: tripId
           in: path
           required: true
           schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [trang_thai_moi]
+              properties:
+                trang_thai_moi:
+                  type: string
+                  description: Trạng thái đích nhân viên gán thủ công cho chuyến
+                ghi_chu:
+                  type: string
+                  description: Lý do can thiệp — lưu kèm bản ghi audit
       responses:
         "200":
-          description: Chuyến lỗi đã được xử lý
+          description: >
+            Chuyến lỗi đã được xử lý; thao tác được ghi log; khách/tài xế
+            liên quan nhận thông báo cập nhật nếu có.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/TripRef" }
@@ -95,6 +130,7 @@ paths:
     get:
       tags: [Admin]
       summary: Tra cứu lịch sử giao dịch
+      operationId: listTransactions
       x-fr: [FR48]
       x-ac: []
       responses:
@@ -110,11 +146,12 @@ paths:
     get:
       tags: [Admin]
       summary: Xem log thao tác quan trọng (audit)
+      operationId: listAuditLogs
       x-fr: [FR51]
       x-ac: [AC37]
       responses:
         "200":
-          description: Mỗi thao tác nhạy cảm sinh một bản ghi audit (AC37, RULE14)
+          description: Mỗi thao tác nhạy cảm sinh một bản ghi audit
           content:
             application/json:
               schema:
@@ -131,7 +168,7 @@ components:
       type: apiKey
       in: header
       name: X-Role
-      description: "FR49 — Kiểm tra phân quyền cho thao tác nhạy cảm (RULE12)"
+      description: Kiểm tra phân quyền cho thao tác nhạy cảm
 
   schemas:
     Error:
@@ -140,10 +177,9 @@ components:
         code: { type: string }
         message: { type: string }
 
-    # Bản tham chiếu rút gọn — dữ liệu gốc thuộc service khác
     CustomerRef:
       type: object
-      description: Dữ liệu gốc thuộc User/Auth Service
+      description: Dữ liệu gốc thuộc Auth Service
       properties:
         id: { type: string }
         ho_ten: { type: string }
@@ -151,11 +187,20 @@ components:
 
     DriverRef:
       type: object
-      description: Dữ liệu gốc thuộc User/Auth Service
+      description: Dữ liệu gốc thuộc Auth Service
       properties:
         id: { type: string }
         ho_ten: { type: string }
         trang_thai: { type: string }
+
+    VehicleRef:
+      type: object
+      description: Dữ liệu gốc thuộc Auth Service
+      properties:
+        id: { type: string }
+        driver_id: { type: string }
+        loai_xe: { type: string }
+        bien_so: { type: string }
 
     TripRef:
       type: object
