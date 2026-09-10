@@ -3,12 +3,10 @@ info:
   title: CAB - User/Auth Service
   description: >
     Quản lý tài khoản, xác thực, hồ sơ Customer & Driver.
-    Sinh từ FR01-FR08, FR30 và AC tương ứng trong SRS (Bước 7 / Bước 13).
-  version: "0.1.0-mvp"
+  version: "1.0.0"
 
 servers:
-  - url: https://api.cab.example.com/auth-service
-    description: Mock/dev server
+  - url: http://localhost:8080/api/v1
 
 tags:
   - name: Auth
@@ -23,6 +21,7 @@ paths:
     post:
       tags: [Auth]
       summary: Đăng ký tài khoản khách hàng
+      operationId: registerCustomer
       x-fr: [FR01]
       x-ac: [AC01, AC02]
       security: []
@@ -40,12 +39,12 @@ paths:
                 mat_khau: { type: string, format: password }
       responses:
         "201":
-          description: Tạo tài khoản thành công (AC01)
+          description: Tạo tài khoản thành công
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Customer" }
         "409":
-          description: Định danh (SĐT/email) đã tồn tại (AC02)
+          description: Định danh (SĐT/email) đã tồn tại
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -54,6 +53,7 @@ paths:
     post:
       tags: [Auth]
       summary: Tạo tài khoản tài xế (tự đăng ký hoặc do NV vận hành tạo)
+      operationId: registerDriver
       x-fr: [FR05]
       x-ac: [AC14]
       requestBody:
@@ -84,6 +84,7 @@ paths:
     post:
       tags: [Auth]
       summary: Đăng nhập, cấp phiên (dùng chung Customer & Driver)
+      operationId: login
       x-fr: [FR02]
       x-ac: [AC01, AC03, AC14]
       security: []
@@ -99,7 +100,7 @@ paths:
                 mat_khau: { type: string, format: password }
       responses:
         "200":
-          description: Đăng nhập thành công, trả về token (AC01, AC14)
+          description: Đăng nhập thành công, trả về token
           content:
             application/json:
               schema:
@@ -108,7 +109,14 @@ paths:
                   access_token: { type: string }
                   role: { type: string, enum: [customer, driver] }
         "401":
-          description: Sai mật khẩu (AC03) — khóa tạm thời sau N lần sai (default)
+          description: Sai mật khẩu — tăng bộ đếm đăng nhập sai của tài khoản.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "423":
+          description: >
+            Tài khoản đang bị khoá tạm thời do đã sai mật khẩu 5 lần liên
+            tiếp (default) — thử lại sau 15 phút (default), cấu hình được.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -117,8 +125,9 @@ paths:
     get:
       tags: [Customer]
       summary: Xem hồ sơ cá nhân
-      x-fr: []
-      x-ac: []
+      operationId: getMyCustomerProfile
+      x-fr: [FR03]
+      x-ac: [AC42]
       responses:
         "200":
           description: Thông tin hồ sơ khách hàng
@@ -128,11 +137,9 @@ paths:
     put:
       tags: [Customer]
       summary: Cập nhật hồ sơ cá nhân (họ tên, SĐT, email)
+      operationId: updateMyCustomerProfile
       x-fr: [FR03]
-      x-ac: []
-      description: >
-        LƯU Ý: UC02 hiện chưa có Acceptance Criteria (AC) tương ứng trong SRS —
-        cần bổ sung trước khi viết test case cho endpoint này.
+      x-ac: [AC42, AC43, AC44, AC45]
       requestBody:
         required: true
         content:
@@ -159,14 +166,12 @@ paths:
     get:
       tags: [Customer]
       summary: Xem lịch sử chuyến đi + số tiền
+      operationId: getMyTripHistory
       x-fr: [FR04]
       x-ac: [AC13]
-      description: >
-        Đọc dữ liệu tổng hợp từ Trip Service (qua API Gateway hoặc BFF).
-        Đặt ở đây vì gắn với hồ sơ khách hàng, không sở hữu dữ liệu Trip gốc.
       responses:
         "200":
-          description: Danh sách chuyến của chính khách hàng (AC13)
+          description: Danh sách chuyến của chính khách hàng
           content:
             application/json:
               schema:
@@ -177,6 +182,7 @@ paths:
     get:
       tags: [Driver]
       summary: Xem hồ sơ & phương tiện tài xế
+      operationId: getMyDriverProfile
       x-fr: []
       x-ac: [AC15]
       responses:
@@ -188,8 +194,9 @@ paths:
     put:
       tags: [Driver]
       summary: Cập nhật hồ sơ tài xế
+      operationId: updateMyDriverProfile
       x-fr: [FR06]
-      x-ac: [AC15]
+      x-ac: [AC15, AC46]
       requestBody:
         required: true
         content:
@@ -200,7 +207,7 @@ paths:
                 ho_ten: { type: string }
       responses:
         "200":
-          description: Cập nhật thành công (AC15)
+          description: Cập nhật thành công
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Driver" }
@@ -209,8 +216,9 @@ paths:
     put:
       tags: [Driver]
       summary: Cập nhật thông tin phương tiện
+      operationId: updateMyVehicle
       x-fr: [FR07]
-      x-ac: [AC15]
+      x-ac: [AC15, AC46]
       requestBody:
         required: true
         content:
@@ -218,15 +226,21 @@ paths:
             schema: { $ref: "#/components/schemas/Vehicle" }
       responses:
         "200":
-          description: Lưu & dùng cho lọc ở Matching Service (AC15)
+          description: Lưu & dùng cho lọc ở Matching Service
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Vehicle" }
+        "400":
+          description: Thông tin phương tiện không hợp lệ (loại xe, biển số)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
   /drivers/me/status:
     patch:
       tags: [Driver]
       summary: Đổi trạng thái sẵn sàng / không sẵn sàng
+      operationId: updateMyDriverStatus
       x-fr: [FR08]
       x-ac: [AC16, AC17]
       requestBody:
@@ -240,12 +254,12 @@ paths:
                 trang_thai: { type: string, enum: [available, unavailable] }
       responses:
         "200":
-          description: Cập nhật & đủ điều kiện được ghép (AC16, RULE01)
+          description: Cập nhật & đủ điều kiện được ghép
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Driver" }
         "409":
-          description: Ngoài ca làm việc hoặc đang có chuyến — từ chối (AC17, RULE02/RULE03)
+          description: Ngoài ca làm việc hoặc đang có chuyến — từ chối
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -254,21 +268,31 @@ paths:
     patch:
       tags: [Driver]
       summary: Ghi nhận & cập nhật vị trí tài xế (nạp dữ liệu cho Matching Service)
+      operationId: updateMyDriverLocation
       x-fr: [FR30]
       x-ac: [AC35]
+      description: Text tự do — server quy đổi qua Distance Provider trước khi lưu.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [lat, lng]
+              required: [vi_tri_text]
               properties:
-                lat: { type: number, format: float }
-                lng: { type: number, format: float }
+                vi_tri_text:
+                  type: string
+                  description: Text tự do, VD "Sân bay Tân Sơn Nhất" hoặc địa chỉ bất kỳ
       responses:
         "204":
-          description: Vị trí đã ghi nhận, phát event cho Matching Service dùng (AC35)
+          description: >
+            Vị trí đã quy đổi & ghi nhận (lưu cả text lẫn lat/lng), phát
+            event `driver.location_updated`.
+        "400":
+          description: Không quy đổi được vị trí (thiếu vi_tri_text)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
 components:
   securitySchemes:
@@ -276,7 +300,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: "FR50 — Xác thực trước chức năng cần tài khoản (RULE13, AC30)"
 
   schemas:
     Error:
@@ -311,10 +334,16 @@ components:
 
     TripSummary:
       type: object
-      description: Bản rút gọn của Trip (dữ liệu gốc thuộc Trip Service)
       properties:
         id: { type: string }
-        diem_don: { type: string }
-        diem_den: { type: string }
+        diem_don_text: { type: string }
+        diem_den_text: { type: string }
         trang_thai: { type: string }
         tong_tien: { type: number, nullable: true }
+
+x-events-published:
+  - name: driver.location_updated
+    x-fr: [FR30]
+    x-ac: [AC35]
+    description: Matching Service nghe để cập nhật dữ liệu lọc bán kính.
+    payload: { driver_id: string, lat: number, lng: number }
