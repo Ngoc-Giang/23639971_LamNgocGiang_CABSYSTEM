@@ -1,0 +1,266 @@
+﻿"Test Case ID","Test Scenario","Test Case","Preconditions","Test Steps","Test Data","Expected Result","Priority"
+"TC-AUTH-001","Đăng ký tài khoản khách hàng","Đăng ký với thông tin hợp lệ","SĐT chưa được đăng ký trong hệ thống","1. Mở màn hình Đăng ký
+2. Nhập họ tên, SĐT, email, mật khẩu hợp lệ
+3. Nhấn Đăng ký","Họ tên: Nguyen Van A
+SĐT: 0901234567
+Email: a@gmail.com
+Mật khẩu: Abc@12345","Tạo tài khoản thành công; chuyển sang được đăng nhập ngay sau đó","High"
+"TC-AUTH-002","Đăng ký tài khoản khách hàng","Đăng ký bằng SĐT đã tồn tại","SĐT ""0901234567"" đã có tài khoản (từ TC-AUTH-001)","1. Mở màn hình Đăng ký
+2. Nhập lại đúng SĐT đã tồn tại
+3. Nhấn Đăng ký","Họ tên: Nguyen Van A2
+SĐT: 0901234567
+Mật khẩu: Abc@12345","Đăng ký thất bại; hiển thị thông báo SĐT/email đã tồn tại","High"
+"TC-AUTH-003","Đăng ký tài khoản khách hàng","Để trống họ tên","Đang ở màn hình Đăng ký","1. Để trống họ tên
+2. Nhập SĐT và mật khẩu
+3. Nhấn Đăng ký","Họ tên: (để trống)
+SĐT: 0901234568
+Mật khẩu: Abc@12345","Không cho đăng ký; hiển thị lỗi yêu cầu nhập họ tên","High"
+"TC-AUTH-004","Đăng ký tài khoản khách hàng","Để trống số điện thoại","Đang ở màn hình Đăng ký","1. Nhập họ tên
+2. Để trống SĐT
+3. Nhập mật khẩu
+4. Nhấn Đăng ký","Họ tên: Nguyen Van C
+SĐT: (để trống)
+Mật khẩu: Abc@12345","Không cho đăng ký; hiển thị lỗi yêu cầu nhập SĐT","High"
+"TC-AUTH-005","Đăng ký tài khoản khách hàng","Để trống mật khẩu","Đang ở màn hình Đăng ký","1. Nhập họ tên và SĐT
+2. Để trống mật khẩu
+3. Nhấn Đăng ký","Họ tên: Nguyen Van D
+SĐT: 0901234570
+Mật khẩu: (để trống)","Không cho đăng ký; hiển thị lỗi yêu cầu nhập mật khẩu","High"
+"TC-AUTH-006","Đăng ký tài khoản khách hàng","Email sai định dạng","Đang ở màn hình Đăng ký","1. Nhập đầy đủ thông tin, email không đúng định dạng
+2. Nhấn Đăng ký","Họ tên: Nguyen Van E
+SĐT: 0901234572
+Email: not-an-email
+Mật khẩu: Abc@12345","Từ chối dữ liệu; hiển thị lỗi email không đúng định dạng","Medium"
+"TC-AUTH-007","Đăng ký tài khoản khách hàng","[Biên] SĐT đúng 10 chữ số","Quy tắc SĐT phải đủ 10 chữ số","1. Nhập SĐT gồm đúng 10 chữ số
+2. Nhập các trường còn lại hợp lệ
+3. Nhấn Đăng ký","Họ tên: Nguyen Van F
+SĐT: 0912345678
+Mật khẩu: Abc@12345","Đăng ký thành công (đủ 10 chữ số là hợp lệ)","Medium"
+"TC-AUTH-008","Đăng ký tài khoản khách hàng","[Biên] SĐT chỉ có 9 chữ số","Quy tắc SĐT phải đủ 10 chữ số","1. Nhập SĐT chỉ 9 chữ số
+2. Nhấn Đăng ký","Họ tên: Nguyen Van G
+SĐT: 091234567
+Mật khẩu: Abc@12345","Từ chối; hiển thị lỗi sai định dạng SĐT","Medium"
+"TC-AUTH-009","Đăng ký tài khoản khách hàng","[Biên] SĐT có 11 chữ số","Quy tắc SĐT phải đủ 10 chữ số","1. Nhập SĐT 11 chữ số
+2. Nhấn Đăng ký","Họ tên: Nguyen Van H
+SĐT: 09123456789
+Mật khẩu: Abc@12345","Từ chối; hiển thị lỗi sai định dạng SĐT","Low"
+"TC-AUTH-010","Đăng ký tài khoản tài xế","Tài xế tự đăng ký (không chọn người tạo)","SĐT chưa tồn tại","1. Mở màn hình Đăng ký Tài xế
+2. Nhập họ tên, SĐT, mật khẩu
+3. Nhấn Đăng ký (không chọn 'do nhân viên tạo')","Họ tên: Tran Van Tai
+SĐT: 0933334444
+Mật khẩu: Abc@12345","Đăng ký thành công; hệ thống tự ghi nhận là tài khoản tự đăng ký","High"
+"TC-AUTH-011","Đăng ký tài khoản tài xế","Nhân viên vận hành tạo tài khoản cho tài xế","Nhân viên vận hành đang thao tác, SĐT chưa tồn tại","1. Nhân viên mở chức năng tạo tài khoản tài xế
+2. Nhập thông tin, đánh dấu 'do nhân viên tạo'
+3. Xác nhận tạo","Họ tên: Tran Van Tai 2
+SĐT: 0933334445
+Mật khẩu: Abc@12345
+Người tạo: Nhân viên vận hành","Tạo tài khoản tài xế thành công","Medium"
+"TC-AUTH-012","Đăng nhập","Đăng nhập với SĐT và mật khẩu đúng","Tài khoản đã tồn tại và không bị khoá","1. Mở màn hình Đăng nhập
+2. Nhập SĐT/email
+3. Nhập mật khẩu
+4. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: Abc@12345","Đăng nhập thành công; vào được hệ thống","High"
+"TC-AUTH-013","Đăng nhập","Đăng nhập với mật khẩu sai (lần đầu)","Tài khoản tồn tại, chưa từng đăng nhập sai lần nào trước đó","1. Nhập đúng định danh
+2. Nhập sai mật khẩu
+3. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: SaiRoi@123","Đăng nhập thất bại; hiển thị thông tin đăng nhập không đúng (chưa bị khoá vì mới sai 1 lần)","High"
+"TC-AUTH-014","Đăng nhập","Đăng nhập với định danh không tồn tại","Đang ở màn hình Đăng nhập","1. Nhập SĐT chưa từng đăng ký
+2. Nhập mật khẩu bất kỳ
+3. Nhấn Đăng nhập","Định danh: 0999999999
+Mật khẩu: Abc@12345","Đăng nhập thất bại; thông tin đăng nhập không hợp lệ","High"
+"TC-AUTH-015","Đăng nhập","Để trống định danh","Đang ở màn hình Đăng nhập","1. Để trống ô định danh
+2. Nhập mật khẩu
+3. Nhấn Đăng nhập","Định danh: (để trống)
+Mật khẩu: Abc@12345","Không cho đăng nhập; báo lỗi yêu cầu nhập định danh","High"
+"TC-AUTH-016","Đăng nhập","Để trống mật khẩu","Đang ở màn hình Đăng nhập","1. Nhập định danh
+2. Để trống mật khẩu
+3. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: (để trống)","Không cho đăng nhập; báo lỗi yêu cầu nhập mật khẩu","High"
+"TC-AUTH-017","Đăng nhập","[Business Rule] Sai mật khẩu đủ 5 lần liên tiếp","Tài khoản đã sai mật khẩu 4 lần liên tiếp trước đó","1. Nhập đúng định danh
+2. Nhập sai mật khẩu (lần thứ 5 liên tiếp)
+3. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: SaiRoi@123","Đăng nhập thất bại; tài khoản bị khoá tạm thời 15 phút (mặc định, có thể cấu hình)","High"
+"TC-AUTH-018","Đăng nhập","[Ngoại lệ] Đăng nhập đúng mật khẩu trong lúc tài khoản đang bị khoá","Tài khoản đang trong thời gian khoá tạm thời (chưa hết 15 phút)","1. Nhập đúng định danh và đúng mật khẩu
+2. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: Abc@12345","Vẫn báo đăng nhập thất bại do tài khoản đang bị khoá — dù mật khẩu đúng","High"
+"TC-AUTH-019","Đăng nhập","[Business Rule] Đăng nhập lại sau khi hết thời gian khoá","Đã qua 15 phút kể từ lúc tài khoản bị khoá","1. Nhập đúng định danh và mật khẩu, sau khi đã hết thời gian khoá
+2. Nhấn Đăng nhập","Định danh: 0901234567
+Mật khẩu: Abc@12345","Đăng nhập thành công bình thường; số lần sai trước đó được đặt lại về 0","Medium"
+"TC-AUTH-020","Đăng nhập","Kiểm tra mật khẩu không hiển thị dạng chữ thường (plaintext)","Đang ở màn hình Đăng nhập","1. Click vào ô Mật khẩu
+2. Nhập mật khẩu","Mật khẩu: Abc@12345","Mật khẩu được che (hiển thị dấu chấm/sao), không hiện chữ rõ","Medium"
+"TC-AUTH-021","Đăng nhập","Đăng nhập thành công và truy cập được chức năng yêu cầu đăng nhập","Tài khoản hợp lệ, không bị khoá","1. Đăng nhập với thông tin hợp lệ
+2. Sau khi vào hệ thống, mở 1 chức năng cần đăng nhập (VD Đặt chuyến)","Định danh: 0901234567
+Mật khẩu: Abc@12345","Vào được chức năng yêu cầu đăng nhập, không bị chặn lại","High"
+"TC-PROFILE-001","Quản lý hồ sơ cá nhân (Customer)","Xem hồ sơ cá nhân","Đã đăng nhập","1. Mở màn hình Hồ sơ cá nhân","(không cần nhập gì, chỉ xem)","Hiển thị đúng thông tin của chính tài khoản đang đăng nhập","High"
+"TC-PROFILE-002","Quản lý hồ sơ cá nhân (Customer)","Cập nhật hồ sơ với dữ liệu hợp lệ","Đang ở màn hình Hồ sơ cá nhân","1. Sửa họ tên, SĐT, email
+2. Nhấn Lưu","Họ tên: Nguyen Van A (mới)
+SĐT: 0909876543
+Email: a.new@gmail.com","Lưu thành công; thông tin hiển thị đúng dữ liệu mới","High"
+"TC-PROFILE-003","Quản lý hồ sơ cá nhân (Customer)","Để trống họ tên (trường bắt buộc)","Đang ở màn hình Hồ sơ cá nhân","1. Xoá trắng ô họ tên
+2. Nhấn Lưu","Họ tên: (để trống)","Từ chối lưu; báo lỗi thiếu họ tên; dữ liệu cũ không bị mất","High"
+"TC-PROFILE-004","Quản lý hồ sơ cá nhân (Customer)","Nhập SĐT sai định dạng (không đủ 10 số)","Đang ở màn hình Hồ sơ cá nhân","1. Sửa SĐT thành giá trị không hợp lệ
+2. Nhấn Lưu","SĐT: 12345","Từ chối lưu; báo lỗi định dạng SĐT","Medium"
+"TC-PROFILE-005","Quản lý hồ sơ cá nhân (Customer)","Nhập email sai định dạng","Đang ở màn hình Hồ sơ cá nhân","1. Sửa email thành giá trị sai định dạng
+2. Nhấn Lưu","Email: abc.com","Từ chối lưu; báo lỗi định dạng email","Medium"
+"TC-PROFILE-006","Quản lý hồ sơ cá nhân (Customer)","[Business Rule] Khách A cố sửa hồ sơ của khách B","Đăng nhập bằng tài khoản Khách A","1. Đăng nhập bằng tài khoản A
+2. Thử thao tác để sửa hồ sơ của B (không có màn hình nào cho phép chọn tài khoản khác)
+3. Kiểm tra lại hồ sơ B","Đăng nhập: Khách A","Không có cách nào sửa được hồ sơ B từ giao diện của A; hồ sơ B không thay đổi","High"
+"TC-PROFILE-007","Quản lý hồ sơ cá nhân (Customer)","[Ngoại lệ] Mở màn hình hồ sơ khi chưa đăng nhập","Chưa đăng nhập","1. Cố mở màn hình Hồ sơ cá nhân mà không đăng nhập","(không có phiên đăng nhập)","Không vào được; chuyển hướng yêu cầu đăng nhập","High"
+"TC-PROFILE-008","Quản lý hồ sơ cá nhân (Customer)","[Biên] Nhập họ tên rất dài (256 ký tự)","SRS chưa quy định rõ giới hạn độ dài họ tên","1. Nhập họ tên dài 256 ký tự
+2. Nhấn Lưu","Họ tên: (chuỗi 256 ký tự)","Chưa có ngưỡng chính thức — cần xác nhận với khách hàng giới hạn tối đa trước khi code; ghi nhận lại để theo dõi","Low"
+"TC-PROFILE-009","Quản lý hồ sơ & phương tiện (Driver)","[Business Rule] Tài xế A cố sửa hồ sơ tài xế B","Đăng nhập bằng tài khoản Tài xế A","1. Đăng nhập bằng tài khoản A
+2. Kiểm tra không có cách nào chọn sửa hồ sơ B","Đăng nhập: Tài xế A","Không sửa được hồ sơ B từ giao diện của A; hồ sơ B không đổi","High"
+"TC-PROFILE-010","Quản lý hồ sơ & phương tiện (Driver)","Cập nhật thông tin phương tiện không hợp lệ (để trống)","Đăng nhập với vai trò tài xế, đang ở màn hình Phương tiện","1. Xoá trắng loại xe và biển số
+2. Nhấn Lưu","Loại xe: (để trống)
+Biển số: (để trống)","Từ chối lưu; báo lỗi thông tin phương tiện không hợp lệ","Medium"
+"TC-TRIP-001","Đặt chuyến xe","Đặt chuyến với đầy đủ thông tin hợp lệ","Đã đăng nhập (Khách hàng)","1. Mở màn hình Đặt chuyến
+2. Nhập điểm đón, điểm đến
+3. Chọn loại xe
+4. Nhấn Đặt xe","Điểm đón: Sân bay Tân Sơn Nhất
+Điểm đến: Chợ Bến Thành
+Loại xe: Tiêu chuẩn","Tạo chuyến thành công; hiển thị trạng thái 'đang tìm tài xế'","High"
+"TC-TRIP-002","Đặt chuyến xe","Không nhập điểm đón","Đang ở màn hình Đặt chuyến","1. Để trống điểm đón
+2. Nhập điểm đến, chọn loại xe
+3. Nhấn Đặt xe","Điểm đón: (để trống)
+Điểm đến: Chợ Bến Thành
+Loại xe: Tiêu chuẩn","Không tạo được chuyến; báo lỗi thiếu điểm đón","High"
+"TC-TRIP-003","Đặt chuyến xe","Không nhập điểm đến","Đang ở màn hình Đặt chuyến","1. Nhập điểm đón
+2. Để trống điểm đến
+3. Nhấn Đặt xe","Điểm đón: Sân bay Tân Sơn Nhất
+Điểm đến: (để trống)
+Loại xe: Tiêu chuẩn","Không tạo được chuyến; báo lỗi thiếu điểm đến","High"
+"TC-TRIP-004","Đặt chuyến xe","Không chọn loại xe","Đang ở màn hình Đặt chuyến","1. Nhập điểm đón, điểm đến
+2. Không chọn loại xe
+3. Nhấn Đặt xe","Điểm đón: Sân bay Tân Sơn Nhất
+Điểm đến: Chợ Bến Thành
+Loại xe: (chưa chọn)","Không tạo được chuyến; báo lỗi chưa chọn loại xe","High"
+"TC-TRIP-005","Đặt chuyến xe","[Ngoại lệ] Đặt chuyến khi chưa đăng nhập","Chưa đăng nhập","1. Cố mở màn hình Đặt chuyến khi chưa đăng nhập","(không có phiên đăng nhập)","Không vào được; yêu cầu đăng nhập trước","High"
+"TC-TRIP-006","Đặt chuyến xe","[Biên] Điểm đón trùng điểm đến","SRS chưa chốt có nên chặn trường hợp này hay không","1. Nhập điểm đón và điểm đến giống nhau
+2. Chọn loại xe
+3. Nhấn Đặt xe","Điểm đón: Chợ Bến Thành
+Điểm đến: Chợ Bến Thành
+Loại xe: Tiêu chuẩn","Hệ thống vẫn tạo chuyến (SRS không cấm); khi hoàn thành, cước chỉ tính giá cơ bản do khoảng cách = 0. Cần xác nhận với khách hàng có nên chặn case này","Low"
+"TC-TRIP-007","Đặt chuyến xe","Đặt chuyến với địa chỉ lạ, không có trong danh sách gợi ý","Đã đăng nhập","1. Nhập điểm đón là một địa chỉ bất kỳ, không nằm trong danh sách địa điểm quen thuộc
+2. Nhập điểm đến, chọn loại xe
+3. Nhấn Đặt xe","Điểm đón: Địa chỉ XYZ không xác định 123
+Điểm đến: Chợ Bến Thành
+Loại xe: Tiêu chuẩn","Vẫn tạo chuyến thành công bình thường, không báo lỗi","Medium"
+"TC-TRIP-008","Đặt chuyến xe","Đặt 2 chuyến liên tiếp với cùng điểm đón là địa chỉ lạ","Đã đăng nhập","1. Đặt 1 chuyến với điểm đón là địa chỉ lạ
+2. Đặt thêm 1 chuyến khác với cùng điểm đón đó","Điểm đón (cả 2 lần): Địa chỉ XYZ không xác định 123","Cả 2 chuyến đều dùng chung 1 toạ độ suy ra cho điểm đón đó — kết quả nhất quán giữa các lần","Medium"
+"TC-TRACK-001","Theo dõi chuyến đi","Khách xem chuyến của chính mình","Có chuyến đang xử lý, đã đăng nhập","1. Mở màn hình Theo dõi chuyến","(xem chuyến hiện tại của mình)","Hiển thị đúng trạng thái hiện tại của chuyến","High"
+"TC-TRACK-002","Theo dõi chuyến đi","[Business Rule] Khách A cố xem chuyến của khách B","Chuyến thuộc về Khách B, đang đăng nhập bằng tài khoản A","1. Đăng nhập bằng A
+2. Thử truy cập màn hình theo dõi chuyến của B (không có đường dẫn hợp lệ từ giao diện A)","Đăng nhập: Khách A","Không xem được chuyến của B; bị từ chối truy cập","High"
+"TC-TRACK-003","Theo dõi chuyến đi","Xem chuyến không tồn tại","Đã đăng nhập","1. Cố mở 1 chuyến không có thật (VD gõ tay 1 mã chuyến không tồn tại)","Mã chuyến: không tồn tại","Cách xử lý chưa được mô tả rõ trong tài liệu — đề xuất hiển thị thông báo 'không tìm thấy chuyến'","Medium"
+"TC-TRACK-004","Theo dõi chuyến đi","[Ngoại lệ] Khách mất kết nối dưới 60 giây khi đang tìm tài xế","Chuyến đang ở trạng thái tìm tài xế; khách mất mạng rồi kết nối lại","1. Ngắt kết nối mạng của khách
+2. Đợi dưới 60 giây
+3. Kết nối lại, mở lại màn hình theo dõi","Thời gian mất kết nối: dưới 60 giây","Xem lại được đúng trạng thái hiện tại; việc tìm tài xế vẫn tiếp tục chạy dù khách bị mất kết nối tạm thời","Medium"
+"TC-DRIVER-001","Đổi trạng thái sẵn sàng","Tài xế đang trong ca chuyển sang Sẵn sàng","Tài xế đang trong ca làm việc, không có chuyến nào đang chạy","1. Mở màn hình Trạng thái tài xế
+2. Bật công tắc Sẵn sàng","Trạng thái: Sẵn sàng","Chuyển trạng thái thành công; đủ điều kiện được hệ thống ghép chuyến","High"
+"TC-DRIVER-002","Đổi trạng thái sẵn sàng","[Business Rule] Tài xế ngoài ca cố chuyển sang Sẵn sàng","Tài xế hiện KHÔNG trong ca làm việc","1. Mở màn hình Trạng thái tài xế
+2. Bật công tắc Sẵn sàng","Trạng thái: Sẵn sàng","Từ chối; hiển thị thông báo tài xế đang ngoài ca làm việc","High"
+"TC-DRIVER-003","Đổi trạng thái sẵn sàng","[Business Rule] Tài xế đang có chuyến cố chuyển sang Sẵn sàng","Tài xế đang thực hiện 1 chuyến","1. Trong lúc đang chạy chuyến, mở màn hình Trạng thái
+2. Thử bật Sẵn sàng","Trạng thái hiện tại: Đang có chuyến","Từ chối; không cho chuyển vì đang có chuyến được gán","High"
+"TC-DRIVER-004","Cập nhật vị trí tài xế","Cập nhật vị trí hiện tại hợp lệ","Đã đăng nhập vai trò tài xế","1. Mở chức năng cập nhật vị trí
+2. Nhập/chọn vị trí hiện tại","Vị trí: Chợ Bến Thành","Cập nhật thành công; vị trí mới được dùng cho việc ghép tài xế","High"
+"TC-DRIVER-005","Cập nhật vị trí tài xế","Để trống vị trí","Đã đăng nhập vai trò tài xế","1. Mở chức năng cập nhật vị trí
+2. Không nhập gì, nhấn Cập nhật","Vị trí: (để trống)","Từ chối; báo lỗi chưa nhập vị trí","Medium"
+"TC-DRIVER-006","Đổi trạng thái sẵn sàng","[Ngoại lệ] Thao tác khi chưa đăng nhập","Chưa đăng nhập","1. Cố mở màn hình Trạng thái tài xế khi chưa đăng nhập","(không có phiên đăng nhập)","Không vào được; yêu cầu đăng nhập trước","High"
+"TC-MATCH-001","Tìm & phân công tài xế","Có 1 tài xế Sẵn sàng, đúng loại xe, trong bán kính","Tài xế X: Sẵn sàng, đúng loại xe, cách điểm đón 0.5km","1. Khách đặt chuyến
+2. Quan sát hệ thống tự động tìm tài xế","Tài xế X cách điểm đón 0.5km","Tài xế X nhận được đề xuất chuyến trên màn hình của mình","High"
+"TC-MATCH-002","Tìm & phân công tài xế","[Biên] Tài xế cách điểm đón đúng 1.0km","Tài xế cách điểm đón chính xác ở mức biên bán kính mặc định. SRS chưa chốt biên này có được tính hay không","1. Đặt chuyến với tài xế duy nhất ở đúng 1.0km","Khoảng cách tài xế–điểm đón: 1.0km","Cần xác nhận với khách hàng: biên 1.0km có được tính là 'trong bán kính' hay không, trước khi chốt kết quả mong đợi","Medium"
+"TC-MATCH-003","Tìm & phân công tài xế","[Biên] Tài xế ngoài bán kính (1.01km)","Tài xế cách điểm đón 1.01km, không có tài xế nào khác gần hơn","1. Đặt chuyến trong điều kiện chỉ có tài xế này","Khoảng cách tài xế–điểm đón: 1.01km","Tài xế này không được đề xuất; hệ thống báo không tìm được tài xế","Medium"
+"TC-MATCH-004","Tìm & phân công tài xế","[Business Rule] Tài xế trong bán kính nhưng sai loại xe","Tài xế trong bán kính 1km nhưng loại xe khác với chuyến yêu cầu","1. Đặt chuyến loại xe 7 chỗ trong khi tài xế gần nhất chỉ có xe 4 chỗ","Tài xế: xe 4 chỗ; Chuyến yêu cầu: xe 7 chỗ","Tài xế này không được đề xuất do sai loại xe","High"
+"TC-MATCH-005","Tìm & phân công tài xế","[Business Rule] Nhiều tài xế phù hợp, ưu tiên gần nhất","Tài xế X cách 0.3km, tài xế Y cách 0.7km, cùng đúng loại xe, đều Sẵn sàng","1. Đặt chuyến trong điều kiện có cả 2 tài xế","X: 0.3km; Y: 0.7km","Tài xế X (gần hơn) nhận được đề xuất trước","High"
+"TC-MATCH-006","Tìm & phân công tài xế","[Business Rule] Khoảng cách bằng nhau, ưu tiên đánh giá cao hơn","Tài xế X và Y cách điểm đón bằng nhau; X có đánh giá 4.8 sao, Y có 4.2 sao","1. Đặt chuyến trong điều kiện có cả 2 tài xế cách đều","X: 0.5km, 4.8 sao; Y: 0.5km, 4.2 sao","Tài xế X (đánh giá cao hơn) nhận được đề xuất trước","Medium"
+"TC-MATCH-007","Nhận & phản hồi chuyến","[Ngoại lệ] Tài xế đầu tiên từ chối","Tài xế X là người nhận đề xuất đầu tiên","1. Tài xế X mở đề xuất chuyến
+2. Nhấn Từ chối","Hành động: Từ chối","Hệ thống tự động chuyển đề xuất sang tài xế kế tiếp; khách không phải đặt lại chuyến","High"
+"TC-MATCH-008","Nhận & phản hồi chuyến","[Ngoại lệ] Tài xế không phản hồi trong 20 giây","Tài xế nhận được đề xuất nhưng không bấm gì cả","1. Tài xế nhận đề xuất
+2. Không thao tác gì, đợi quá 20 giây","Thời gian chờ: > 20 giây, không có thao tác","Hệ thống coi như từ chối; tự động chuyển sang tài xế kế tiếp","High"
+"TC-MATCH-009","Tìm & phân công tài xế","[Ngoại lệ] Hết tài xế phù hợp trong bán kính","Chỉ có 2 tài xế phù hợp trong bán kính, cả 2 đều từ chối","1. Đặt chuyến
+2. Cả 2 tài xế lần lượt từ chối đề xuất","2 tài xế, cả 2 đều từ chối","Dừng tìm ngay (không cần chờ đủ số lượng/thời gian tối đa); khách nhận thông báo không tìm được tài xế","High"
+"TC-MATCH-010","Tìm & phân công tài xế","[Biên] Đã thử đủ 5 tài xế nhưng chưa quá 120 giây","5 tài xế lần lượt từ chối/không phản hồi nhanh, tổng thời gian dưới 120 giây","1. Đặt chuyến trong khu vực có nhiều tài xế
+2. Lần lượt 5 tài xế đều từ chối","5 tài xế × từ chối, tổng thời gian dưới 120 giây","Dừng tìm ngay khi đủ 5 tài xế bị thử, không cần đợi tới 120 giây; báo không tìm được tài xế","Medium"
+"TC-MATCH-011","Tìm & phân công tài xế","[Biên] Quá 120 giây nhưng chưa thử đủ 5 tài xế","Ít tài xế phù hợp, mỗi lượt chờ khá lâu khiến tổng thời gian vượt 120 giây trước khi thử hết 5 tài xế","1. Đặt chuyến trong khu vực ít tài xế
+2. Theo dõi tới khi vượt mốc 120 giây","Tổng thời gian tìm > 120 giây, mới thử được 3-4 tài xế","Dừng tìm ngay khi chạm mốc 120 giây, dù chưa thử đủ 5 tài xế; báo không tìm được tài xế","Medium"
+"TC-MATCH-012","Nhận & phản hồi chuyến","[Business Rule] Tài xế đang có chuyến khác cố nhận thêm đề xuất","Tài xế đang thực hiện 1 chuyến khác","1. Trong lúc đang chạy chuyến, tài xế nhận thêm 1 đề xuất khác
+2. Nhấn Chấp nhận","Trạng thái tài xế: đang có chuyến","Không gán được chuyến mới; báo lỗi đang thực hiện chuyến khác","High"
+"TC-MATCH-013","Nhận & phản hồi chuyến","Chấp nhận đề xuất đã hết hạn","Đề xuất đã quá 20 giây (đã tự động chuyển sang tài xế khác)","1. Tài xế cố nhấn Chấp nhận sau khi đề xuất đã hết hạn","Đề xuất: đã hết hạn","Không chấp nhận được; báo đề xuất đã hết hạn/không còn hợp lệ","Medium"
+"TC-MATCH-014","Nhận & phản hồi chuyến","Xem đề xuất đang chờ phản hồi","Tài xế vừa nhận 1 đề xuất, chưa phản hồi","1. Mở màn hình đề xuất chuyến","(chỉ xem, không thao tác)","Hiển thị đúng 1 đề xuất đang chờ","Medium"
+"TC-MATCH-015","Nhận & phản hồi chuyến","Xem đề xuất khi không có đề xuất nào đang chờ","Tài xế không có đề xuất nào đang chờ phản hồi","1. Mở màn hình đề xuất chuyến","(không có đề xuất nào)","Hiển thị danh sách trống, không có đề xuất nào","Low"
+"TC-MATCH-016","Tài xế hủy chuyến đã nhận (Should-have)","[Business Rule] Vòng tìm tài xế mới loại trừ tài xế vừa hủy","Tài xế X vừa hủy chuyến đã nhận","1. Tài xế X hủy chuyến đã nhận
+2. Quan sát hệ thống tìm tài xế mới","Tài xế vừa hủy: X","Vòng tìm tài xế mới không đề xuất lại cho tài xế X, kể cả khi X vẫn Sẵn sàng và trong bán kính","Low"
+"TC-PROGRESS-001","Cập nhật tiến trình chuyến","Cập nhật 'đã đến điểm đón' đúng lúc (bước 1)","Tài xế đã được gán chuyến, chưa cập nhật bước nào","1. Mở màn hình chuyến đang chạy
+2. Nhấn 'Đã đến điểm đón'","Bước cập nhật: Đã đến điểm đón","Cập nhật thành công","High"
+"TC-PROGRESS-002","Cập nhật tiến trình chuyến","Cập nhật 'đã đón khách' đúng lúc (bước 2)","Chuyến đang ở bước 'đã đến điểm đón'","1. Nhấn 'Đã đón khách'","Bước cập nhật: Đã đón khách","Cập nhật thành công","High"
+"TC-PROGRESS-003","Cập nhật tiến trình chuyến","Cập nhật 'đang di chuyển' đúng lúc (bước 3)","Chuyến đang ở bước 'đã đón khách'","1. Nhấn 'Đang di chuyển'","Bước cập nhật: Đang di chuyển","Cập nhật thành công","High"
+"TC-PROGRESS-004","Cập nhật tiến trình chuyến","Cập nhật 'hoàn thành chuyến' đúng lúc (bước cuối)","Chuyến đang ở bước 'đang di chuyển'","1. Nhấn 'Hoàn thành chuyến'","Bước cập nhật: Hoàn thành chuyến","Cập nhật thành công; hệ thống tự động chuyển sang tính cước","High"
+"TC-PROGRESS-005","Cập nhật tiến trình chuyến","[Ngoại lệ] Bỏ qua bước, bấm thẳng 'hoàn thành' khi mới vừa nhận chuyến","Chuyến vừa được gán, chưa qua bước nào","1. Nhấn thẳng 'Hoàn thành chuyến' mà bỏ qua các bước trước","Bước cập nhật: Hoàn thành chuyến (bỏ qua các bước trước)","Từ chối; báo lỗi cập nhật sai thứ tự","High"
+"TC-PROGRESS-006","Cập nhật tiến trình chuyến","[Ngoại lệ] Cập nhật lùi lại bước trước","Chuyến đang ở bước 'đang di chuyển'","1. Cố quay lại bấm 'Đã đến điểm đón' (bước đã qua)","Bước cập nhật: Đã đến điểm đón (đã qua rồi)","Từ chối; không cho cập nhật lùi","High"
+"TC-PROGRESS-007","Cập nhật tiến trình chuyến","[Ngoại lệ] Tài xế mất kết nối, gửi lại cập nhật trễ sai thứ tự","Tài xế mất kết nối ở bước 'đã đón khách'; hệ thống đã ghi nhận 'đang di chuyển' qua lần đồng bộ trước đó","1. Tài xế kết nối lại
+2. Ứng dụng tự gửi lại cập nhật cũ 'đã đón khách' (do lưu tạm lúc mất mạng)","Cập nhật gửi trễ: Đã đón khách (trong khi hệ thống đã ở bước Đang di chuyển)","Từ chối cập nhật trễ sai thứ tự; trạng thái hệ thống giữ nguyên là 'đang di chuyển', không bị ghi đè","High"
+"TC-PROGRESS-008","Cập nhật tiến trình chuyến","[Business Rule] Tài xế khác cố cập nhật chuyến không phải của mình","Chuyến đã gán cho tài xế X, đăng nhập bằng tài khoản tài xế Y","1. Đăng nhập bằng Y
+2. Thử cập nhật tiến trình cho chuyến của X (không có đường dẫn hợp lệ từ giao diện Y)","Đăng nhập: Tài xế Y; Chuyến: thuộc tài xế X","Không có cách nào cập nhật được chuyến của X từ giao diện Y","Medium"
+"TC-FARE-001","Tính cước","Tính cước cho chuyến đã hoàn thành","Chuyến vừa hoàn thành với quãng đường 5.2km","1. Mở màn hình Thanh toán sau khi hoàn thành chuyến","Quãng đường: 5.2km","Cước hiển thị = 64.000đ (giá cơ bản 12.000đ + 10.000đ × 5.2km)","High"
+"TC-FARE-002","Tính cước","Xem cước khi chuyến chưa hoàn thành","Chuyến đang ở trạng thái 'đang di chuyển'","1. Cố mở màn hình cước phí khi chuyến chưa hoàn thành","Trạng thái chuyến: đang di chuyển","Chưa hiển thị cước; báo chuyến chưa hoàn thành","High"
+"TC-FARE-003","Tính cước","[Biên] Quãng đường bằng 0 (điểm đón trùng điểm đến)","Chuyến hoàn thành với quãng đường 0km","1. Mở màn hình Thanh toán","Quãng đường: 0km","Cước hiển thị = 12.000đ (chỉ tính giá cơ bản, không cộng thêm)","Medium"
+"TC-PAY-001","Thanh toán chuyến","Thanh toán bằng tiền mặt","Chuyến đã hoàn thành và đã có cước","1. Mở màn hình Thanh toán
+2. Chọn phương thức Tiền mặt
+3. Xác nhận","Phương thức: Tiền mặt","Xác nhận thanh toán thành công ngay lập tức","High"
+"TC-PAY-002","Thanh toán chuyến","Thanh toán điện tử thành công ngay lần đầu","Chuyến đã có cước","1. Chọn phương thức Ví điện tử
+2. Xác nhận thanh toán","Phương thức: Ví điện tử (giả lập thành công)","Thanh toán thành công ngay lần thử đầu tiên","High"
+"TC-PAY-003","Thanh toán chuyến","[Business Rule] Điện tử thất bại 2 lần, tự động chuyển sang tiền mặt","Chuyến đã có cước","1. Chọn phương thức Ví điện tử
+2. Giả lập giao dịch thất bại liên tiếp 2 lần","Phương thức: Ví điện tử (giả lập thất bại)","Sau 2 lần thất bại, hệ thống tự động chuyển sang thanh toán tiền mặt và báo cho khách biết","High"
+"TC-PAY-004","Thanh toán chuyến","Thanh toán khi chưa có cước","Chuyến chưa hoàn thành, chưa có cước","1. Cố mở màn hình thanh toán khi chưa có cước","Trạng thái: chưa có cước","Không thanh toán được; báo chưa có cước","High"
+"TC-PAY-005","Thanh toán chuyến","Không chọn phương thức thanh toán","Chuyến đã có cước","1. Mở màn hình Thanh toán
+2. Không chọn phương thức nào, nhấn Xác nhận","Phương thức: (chưa chọn)","Từ chối; yêu cầu chọn phương thức thanh toán","Medium"
+"TC-PAY-006","Thanh toán chuyến","[Business Rule] Kiểm tra không lưu thông tin thẻ/tài khoản nhạy cảm","Đã thanh toán điện tử thành công","1. Thanh toán thành công bằng ví điện tử
+2. Kiểm tra lại thông tin giao dịch hiển thị/lưu trữ","Giao dịch điện tử vừa hoàn tất","Không thấy số thẻ, mã bảo mật hay bất kỳ thông tin tài khoản nhạy cảm nào được hiển thị hoặc lưu lại","High"
+"TC-RATE-001","Đánh giá tài xế (Should-have)","Đánh giá 5 sao kèm nhận xét sau khi hoàn thành","Chuyến đã hoàn thành, chưa được đánh giá","1. Mở màn hình Đánh giá
+2. Chọn 5 sao, nhập nhận xét
+3. Gửi đánh giá","Số sao: 5
+Nhận xét: Tài xế thân thiện, đúng giờ","Gửi đánh giá thành công","Medium"
+"TC-RATE-002","Đánh giá tài xế (Should-have)","[Biên] Chọn 1 sao (mức thấp nhất)","Chuyến đã hoàn thành","1. Chọn 1 sao
+2. Gửi đánh giá","Số sao: 1","Gửi thành công (1 sao là mức hợp lệ nhỏ nhất)","Low"
+"TC-RATE-003","Đánh giá tài xế (Should-have)","[Biên] Chọn 0 sao (dưới mức tối thiểu)","Chuyến đã hoàn thành; thang điểm hợp lệ từ 1-5","1. Cố chọn 0 sao (nếu giao diện cho phép nhập tay)
+2. Gửi đánh giá","Số sao: 0","Từ chối; số sao phải trong khoảng 1-5","Medium"
+"TC-RATE-004","Đánh giá tài xế (Should-have)","[Biên] Chọn 6 sao (vượt mức tối đa)","Chuyến đã hoàn thành; thang điểm hợp lệ từ 1-5","1. Cố nhập 6 sao (nếu giao diện cho phép nhập tay)
+2. Gửi đánh giá","Số sao: 6","Từ chối; số sao phải trong khoảng 1-5","Medium"
+"TC-RATE-005","Đánh giá tài xế (Should-have)","[Business Rule] Đánh giá khi chuyến chưa hoàn thành","Chuyến đang ở trạng thái 'đang di chuyển'","1. Cố mở màn hình đánh giá khi chuyến chưa hoàn thành","Trạng thái chuyến: đang di chuyển","Không cho đánh giá; báo chuyến chưa hoàn thành","High"
+"TC-RATE-006","Đánh giá tài xế (Should-have)","Không chọn số sao","Chuyến đã hoàn thành","1. Không chọn sao nào
+2. Nhấn Gửi","Số sao: (chưa chọn)","Từ chối; yêu cầu chọn số sao","Medium"
+"TC-RATE-007","Đánh giá tài xế (Should-have)","Gửi đánh giá không kèm nhận xét","Chuyến đã hoàn thành","1. Chọn 4 sao
+2. Không nhập nhận xét
+3. Nhấn Gửi","Số sao: 4
+Nhận xét: (để trống)","Gửi thành công; nhận xét không bắt buộc","Low"
+"TC-CANCEL-001","Hủy chuyến","Khách hủy khi đang tìm tài xế (miễn phí)","Chuyến đang ở trạng thái tìm tài xế","1. Mở màn hình theo dõi chuyến
+2. Nhấn Hủy chuyến
+3. Xác nhận","Trạng thái chuyến: đang tìm tài xế","Hủy thành công, không mất phí","High"
+"TC-CANCEL-002","Hủy chuyến","[Business Rule] Khách hủy khi đã có tài xế nhưng chưa đón (mất phí)","Chuyến đã có tài xế nhận, chưa đón khách","1. Mở màn hình theo dõi chuyến
+2. Nhấn Hủy chuyến
+3. Xác nhận","Trạng thái chuyến: đã có tài xế, chưa đón khách","Hủy thành công, áp phí hủy 10.000đ (mặc định)","High"
+"TC-CANCEL-003","Hủy chuyến","[Business Rule] Khách cố hủy sau khi đã đón khách","Chuyến đã ở trạng thái 'đã đón khách' hoặc 'đang di chuyển'","1. Cố nhấn Hủy chuyến sau khi đã đón khách","Trạng thái chuyến: đã đón khách","Không cho hủy; báo không thể hủy vào lúc này","High"
+"TC-CANCEL-004","Tài xế hủy chuyến đã nhận (Should-have)","Tài xế hủy chuyến trước khi đón khách","Tài xế đã nhận chuyến, chưa đón khách","1. Tài xế mở màn hình chuyến đang chạy
+2. Nhấn Hủy chuyến
+3. Xác nhận","Trạng thái chuyến: đã nhận, chưa đón khách","Hủy thành công; chuyến quay lại tìm tài xế mới, khách không bị tính phí","Low"
+"TC-CANCEL-005","Tài xế hủy chuyến đã nhận (Should-have)","Tài xế cố hủy sau khi đã đón khách","Chuyến đã ở trạng thái 'đã đón khách' trở đi","1. Tài xế cố nhấn Hủy chuyến sau khi đã đón khách","Trạng thái chuyến: đã đón khách","Không cho hủy","Low"
+"TC-NOTI-001","Thông báo cho khách hàng","Khách nhận thông báo 'đã tiếp nhận yêu cầu' ngay sau khi đặt chuyến","Hệ thống thông báo đang hoạt động bình thường","1. Đặt chuyến mới
+2. Quan sát thông báo nhận được","Vừa đặt 1 chuyến mới","Nhận được thông báo đúng nội dung 'đã tiếp nhận yêu cầu' ngay sau khi đặt chuyến","Medium"
+"TC-NOTI-002","Thông báo cho khách hàng","Khách nhận thông báo khi có tài xế nhận","Tài xế vừa chấp nhận chuyến","1. Tài xế chấp nhận chuyến
+2. Quan sát thông báo phía khách","Tài xế vừa chấp nhận chuyến","Khách nhận được thông báo 'có tài xế nhận' ngay sau đó","Medium"
+"TC-NOTI-003","Thông báo cho tài xế","Tài xế nhận thông báo khi có chuyến mới","Hệ thống vừa gửi đề xuất chuyến tới 1 tài xế","1. Hệ thống gửi đề xuất tới tài xế
+2. Quan sát thông báo phía tài xế","Đề xuất chuyến vừa gửi tới 1 tài xế cụ thể","Đúng tài xế đó nhận được thông báo 'có chuyến mới'","Medium"
+"TC-NOTI-004","Thông báo cho khách hàng","Khách nhận thông báo 'không tìm được tài xế'","Vòng tìm tài xế kết thúc mà không tìm được ai","1. Chờ vòng tìm tài xế hết ứng viên
+2. Quan sát thông báo phía khách","Chuyến không tìm được tài xế nào","Khách nhận được thông báo đúng nội dung 'không tìm được tài xế'","Medium"
+"TC-NOTI-005","Thông báo cho khách hàng","[Ngoại lệ] Hệ thống thông báo bị lỗi nhưng luồng đặt xe vẫn hoạt động","Hệ thống gửi thông báo đang ngừng hoạt động (giả lập lỗi)","1. Trong lúc hệ thống thông báo bị lỗi, khách vẫn đặt chuyến bình thường","Hệ thống thông báo: đang lỗi","Đặt chuyến vẫn thành công bình thường, không bị ảnh hưởng dù thông báo bị lỗi","High"
+"TC-ADMIN-001","Quản trị & vận hành (Should-have)","Nhân viên vận hành xem danh sách chuyến đang chạy","Đăng nhập với tài khoản Nhân viên vận hành","1. Mở màn hình Quản trị
+2. Xem danh sách chuyến đang chạy","(chỉ xem)","Hiển thị đúng danh sách các chuyến đang diễn ra","Medium"
+"TC-ADMIN-002","Quản trị & vận hành (Should-have)","[Business Rule] Người dùng thường cố truy cập màn hình quản trị","Đăng nhập bằng tài khoản Khách hàng/Tài xế thường (không có quyền vận hành)","1. Cố mở màn hình Quản trị bằng tài khoản thường","Đăng nhập: tài khoản không có quyền vận hành","Không vào được; báo không đủ quyền truy cập","High"
+"TC-ADMIN-003","Quản trị & vận hành (Should-have)","[Ngoại lệ] Truy cập màn hình quản trị khi chưa đăng nhập","Chưa đăng nhập","1. Cố mở màn hình Quản trị khi chưa đăng nhập","(không có phiên đăng nhập)","Không vào được; yêu cầu đăng nhập trước","High"
+"TC-ADMIN-004","Quản trị & vận hành (Should-have)","[Business Rule] Nhân viên xử lý chuyến bị lỗi, hệ thống ghi lại lịch sử thao tác","Có 1 chuyến bị kẹt trạng thái; đăng nhập Nhân viên vận hành","1. Mở chuyến bị lỗi
+2. Cập nhật thủ công sang trạng thái phù hợp
+3. Ghi chú lý do can thiệp
+4. Xác nhận","Trạng thái mới: Hoàn thành
+Ghi chú: Xử lý thủ công do kẹt trạng thái","Chuyến chuyển sang trạng thái mới; hệ thống ghi lại lịch sử thao tác này; khách/tài xế liên quan nhận được thông báo","High"
+"TC-ADMIN-005","Quản trị & vận hành (Should-have)","Xử lý chuyến lỗi nhưng không chọn trạng thái mới","Đăng nhập Nhân viên vận hành, đang mở 1 chuyến bị lỗi","1. Không chọn trạng thái mới
+2. Nhấn Xác nhận","Trạng thái mới: (chưa chọn)","Từ chối; yêu cầu chọn trạng thái mới cho chuyến","Medium"
+"TC-ADMIN-006","Quản trị & vận hành (Should-have)","Xem lịch sử thao tác quan trọng (nhật ký)","Đăng nhập Nhân viên vận hành, đã có ít nhất 1 thao tác nhạy cảm trước đó","1. Mở màn hình Nhật ký thao tác","(chỉ xem)","Hiển thị danh sách nhật ký, có đúng thao tác vừa thực hiện ở TC-ADMIN-004","Medium"
