@@ -21,7 +21,7 @@ paths:
   /admin/customers:
     get:
       tags: [Admin]
-      summary: Danh sách khách hàng (xem, tối giản)
+      summary: Danh sách khách hàng
       operationId: listCustomers
       x-fr: [FR45]
       x-ac: []
@@ -58,7 +58,7 @@ paths:
   /admin/vehicles:
     get:
       tags: [Admin]
-      summary: Danh sách phương tiện (xem, tối giản)
+      summary: Danh sách phương tiện
       operationId: listVehicles
       x-fr: [FR45]
       x-ac: []
@@ -168,7 +168,12 @@ components:
       type: apiKey
       in: header
       name: X-Role
-      description: Kiểm tra phân quyền cho thao tác nhạy cảm
+      description: >
+        Kiểm tra phân quyền cho thao tác nhạy cảm. Lưu ý triển khai: giá trị
+        X-Role PHẢI do server tự tra cứu từ user_id trong bearerAuth token đã
+        xác thực (VD: query bảng operations_staff/role), KHÔNG được tin trực
+        tiếp giá trị header do client gửi lên — nếu không sẽ tạo lỗ hổng
+        leo quyền (client tự set X-Role: admin).
 
   schemas:
     Error:
