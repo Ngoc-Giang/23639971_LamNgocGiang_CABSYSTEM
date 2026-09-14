@@ -25,7 +25,7 @@ paths:
   /trips:
     post:
       tags: [Trip]
-      summary: Tạo chuyến — nhập điểm đón/đến (text tự do), chọn loại xe, gửi yêu cầu
+      summary: Tạo chuyến — nhập điểm đón/đến, chọn loại xe, gửi yêu cầu
       operationId: createTrip
       x-fr: [FR09, FR10, FR11]
       x-ac: [AC04, AC05, AC06]
@@ -37,12 +37,8 @@ paths:
               type: object
               required: [diem_don, diem_den, service_type_id]
               properties:
-                diem_don:
-                  type: string
-                  description: Text tự do — server quy đổi sang toạ độ qua Distance Provider
-                diem_den:
-                  type: string
-                  description: Text tự do — server quy đổi sang toạ độ qua Distance Provider
+                diem_don: { type: string }
+                diem_den: { type: string }
                 service_type_id: { type: string }
       responses:
         "201":
@@ -147,7 +143,7 @@ paths:
   /trips/{tripId}/driver-cancel:
     post:
       tags: [Trip]
-      summary: "[Should-have] Tài xế hủy chuyến đã nhận, trước khi đón khách"
+      summary: "Tài xế hủy chuyến đã nhận, trước khi đón khách"
       operationId: driverCancelTrip
       x-priority: should-have
       x-fr: [FR55]
@@ -174,7 +170,7 @@ paths:
   /trips/{tripId}/rating:
     post:
       tags: [Rating]
-      summary: "[Should-have] Khách đánh giá tài xế sau chuyến"
+      summary: "Khách đánh giá tài xế sau chuyến"
       operationId: rateTrip
       x-priority: should-have
       x-fr: [FR44]
@@ -206,7 +202,7 @@ paths:
   /internal/trips/{tripId}/coordinates:
     get:
       tags: [Trip]
-      summary: "[internal] Lấy toạ độ điểm đón/đến của một chuyến"
+      summary: "Lấy toạ độ điểm đón/đến của một chuyến"
       operationId: getTripCoordinatesInternal
       x-fr: [FR12]
       x-ac: []
@@ -224,7 +220,7 @@ paths:
   /internal/trips/{tripId}/dispatch-result:
     post:
       tags: [Trip]
-      summary: "[internal] Nhận kết quả vòng ghép tài xế từ Matching Service"
+      summary: "Nhận kết quả vòng ghép tài xế từ Matching Service"
       operationId: reportDispatchResult
       x-fr: [FR20, FR23]
       x-ac: [AC18, AC26]
