@@ -1493,6 +1493,7 @@ Ghi chú: Toàn bộ Must-have.
 | AC50   | UC14                 | Given nhân viên vận hành phát hiện 1 chuyến bị kẹt trạng thái, When nhân viên can thiệp cập nhật/sửa trạng thái chuyến qua giao diện quản trị, Then chuyến chuyển sang trạng thái hợp lệ, thao tác được ghi log, khách/tài xế liên quan nhận được thông báo cập nhật. |
 AC51     | UC14                 | Given nhân viên vận hành, When tra cứu lịch sử giao dịch, Then hiển thị đúng danh sách giao dịch thanh toán. |
 AC52     | UC09                 | Given tài xế đang thực hiện 1 chuyến, When cố chuyển trạng thái sang sẵn sàng, Then hệ thống từ chối (409). |
+
 Ghi chú: Should-have: AC36, AC50; còn lại Must-have.
 
 # Bước 14: Truy xuất nguồn gốc yêu cầu – Ma trận RTM
