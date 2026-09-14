@@ -1491,7 +1491,8 @@ Ghi chú: Toàn bộ Must-have.
 | AC40   | NFR/EX09             | Given mất kết nối ≤ 60 giây (default), When online lại, Then trạng thái chuyến giữ nguyên & được đồng bộ theo đúng thứ tự; quá hạn khi đang chạy → đánh dấu cần vận hành.                                                                                             |
 | AC41   | NFR13                | Given tham số retention (12 tháng / 30 ngày), When triển khai, Then giá trị nằm ở cấu hình, không hard-code.                                                                                                                                                          |
 | AC50   | UC14                 | Given nhân viên vận hành phát hiện 1 chuyến bị kẹt trạng thái, When nhân viên can thiệp cập nhật/sửa trạng thái chuyến qua giao diện quản trị, Then chuyến chuyển sang trạng thái hợp lệ, thao tác được ghi log, khách/tài xế liên quan nhận được thông báo cập nhật. |
-
+AC51     | UC14                 | Given nhân viên vận hành, When tra cứu lịch sử giao dịch, Then hiển thị đúng danh sách giao dịch thanh toán. |
+AC52     | UC09                 | Given tài xế đang thực hiện 1 chuyến, When cố chuyển trạng thái sang sẵn sàng, Then hệ thống từ chối (409). |
 Ghi chú: Should-have: AC36, AC50; còn lại Must-have.
 
 # Bước 14: Truy xuất nguồn gốc yêu cầu – Ma trận RTM
@@ -1548,3 +1549,5 @@ Ghi chú: Should-have: AC36, AC50; còn lại Must-have.
 | BG03, BG08 | BR22                   | FR54                   | UC04                              | AC48   |
 | BG08       | BR22                   | FR54                   | UC11                              | AC49   |
 | BG06, BG10 | BR17, BR20             | FR47, FR51             | UC14                              | AC50   |
+| BG06       | BR17                   | FR48                   | UC14                              | AC51 |
+| BG01       | BR03                   | FR08                   | UC09                              | AC52 |
