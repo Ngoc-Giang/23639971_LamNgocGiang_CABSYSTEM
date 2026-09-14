@@ -44,7 +44,7 @@ paths:
       summary: Chọn phương thức & thực hiện thanh toán (đồng bộ)
       operationId: makePayment
       x-fr: [FR32, FR33, FR34, FR35, FR36]
-      x-ac: [AC09, AC10]
+      x-ac: [AC09, AC10, AC31]
       description: >
         Nhánh điện tử thử lại tối đa 2 lần (default) trong cùng request;
         hết lần → tự chuyển tiền mặt.
